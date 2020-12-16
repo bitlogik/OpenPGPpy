@@ -6,11 +6,16 @@
 
 from setuptools import setup, find_packages
 
+with open("README.md") as readme_file:
+    readme = readme_file.read()
 
 setup(
     name="OpenPGPpy",
-    version="0.1",
+    version="0.2",
     description="OpenPGP smartcard communication library",
+    long_description=readme + "\n\n",
+    long_description_content_type="text/markdown",
+    keywords="cryptography security openpgp hardware",
     author="BitLogiK",
     author_email="contact@bitlogik.fr",
     url="https://github.com/bitlogik/OpenPGPpy",
@@ -20,6 +25,18 @@ setup(
     extras_require={"dev": ["PyNaCl==1.4.0"]},
     package_data={},
     include_package_data=False,
+    classifiers=[
+        "Programming Language :: Python :: 3 :: Only",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Information Technology",
+        "Intended Audience :: System Administrators",
+        "Intended Audience :: Telecommunications Industry",
+        "Topic :: Communications :: Email",
+        "Topic :: Security :: Cryptography",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: System :: Hardware",
+    ],
     packages=find_packages(),
     zip_safe=False,
 )
