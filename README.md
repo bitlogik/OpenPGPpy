@@ -57,12 +57,17 @@ See demo and interface methods to get the full functions and details.
 
 #### Demo
 
-There are 2 demo scripts in the demo directory. One is just to reset the OpenPGP device. The other generates an X25519 key pair that is used to DECipher data (compute X25519 ECDH).
-They provide examples on how to use this library.
+There are some demonstration scripts provided in the demo directory. They provide examples on how to use this library.
 
-The *demo.py* script requires the pynacl library to check the device responses. This can be installed with the "dev" dependencies part of this package `python3 -m pip  install .["dev"]` or just `python3 -m pip  install pynacl`.
+* reset.py : resets the OpenPGP device.
+* decrypt.py : Generates an X25519 key pair that is used to DECipher data (compute X25519 ECDH).
+* sign.py : Generates a 256k1 key pair, then used to sign data.
 
-Default PIN password for OpenPGP apps :
+The *decrypt.py* script requires the pynacl library to check the device responses. This can be installed with the "dev" dependencies part of this package `python3 -m pip  install .["dev"]` or just `python3 -m pip  install pynacl`.
+
+The *sign.py* script requires openssl binary in the user path to check the device responses.
+
+Default PIN password for OpenPGP devices :
 
 PIN1 : "123456"  
 PIN2 : "123456"  
@@ -171,8 +176,13 @@ Requires the related PIN verified.
 
 `OpenPGPcard.sign( data )`  
 Signs data with the internal device SIGn key (Ref1), calling the COMPUTE DIGITAL SIGNATURE command.  
-data is in bytes "binary" format.  
+data is in bytes "binary" format. With ECDSA, data is the hash to sign.  
+Requires the PIN1 verified.  
 See the OpenPGP application standard for more details about data format.
+
+`OpenPGPcard.sign_ec_der( datahash )`
+EC signs with the internal device SIGn key the hash datahash (bytes) and outputs the signature as ASN1 DER encoded (bytes). Requires the SIG key to be an EC type key pair ("13..." in "C1").  
+Requires the PIN1 verified.
 
 `OpenPGPcard.decipher( data )`  
 Decrypts data with the internal device DECryption key (Ref2), calling the DECIPHER command.  

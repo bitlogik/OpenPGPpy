@@ -16,7 +16,7 @@
 
 
 import time
-
+from . import der_coding
 
 try:
     from smartcard.System import readers
@@ -399,8 +399,13 @@ class OpenPGPcard:
         return bytes(self.send_apdu([0, 0x47, 0x81, 0, 2] + toBytes(keypos_hex)))
 
     def sign(self, data):
-        # Sign data, COMPUTE DIGITAL SIGNATURE command
+        # Sign data, with Compute Digital Signature command
         return bytes(self.send_apdu([0, 0x2A, 0x9E, 0x9A, len(data)] + to_list(data)))
+
+    def sign_ec_der(self, hashdata):
+        # Sign with ECDSA hash data and output signature as ASN1 DER encoded
+        # ec_size is the size in bits of the EC key
+        return der_coding.encode_der(self.sign(hashdata))
 
     def encipher(self):
         # ToDo
