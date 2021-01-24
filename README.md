@@ -82,12 +82,13 @@ if debug = True it displays verbosely all communications with the card.
 Connects to all readers seeking for an OpenPGP card, selects the app and loads its capabilities.
 
 The created object has the following attributes :
-* .name = str, name of the device (or the card reader used)
-* .pgpvermaj = int, OpenPGP application major version (2 or 3)
-* .pgpvermin = int, OpenPGP application minor version
-* .pgpverstr = string, OpenPGP application version "maj.min"
-* .manufacturer = string, hex string of the manufacturer ID "0xXXXX"
-* .serial = int, serial number
+* .name : str, name of the device (or the card reader used)
+* .pgpvermaj : int, OpenPGP application major version (2 or 3)
+* .pgpvermin : int, OpenPGP application minor version
+* .pgpverstr : string, OpenPGP application version "maj.min"
+* .manufacturer_id : string, hex string of the manufacturer ID "0xXXXX"
+* .manufacturer : string, name of the manufacturer (or "- unknown -")
+* .serial : int, serial number
 * .max_cmd : int, maximum command length
 * .max_rsp : int, maximum response length
 * .display : bool, has a display?

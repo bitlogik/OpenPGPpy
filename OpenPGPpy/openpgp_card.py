@@ -110,6 +110,32 @@ def print_list(liststr):
 class OpenPGPcard:
 
     AppID = toBytes("D27600012401")
+    default_manufacturer_name = "- unknown -"
+    manufacturer_list = {
+        0x0001: "PPC Card Systems",
+        0x0002: "Prism",
+        0x0003: "OpenFortress",
+        0x0004: "Wewid",
+        0x0005: "ZeitControl",
+        0x0006: "Yubico",
+        0x0007: "OpenKMS",
+        0x0008: "LogoEmail",
+        0x0009: "Fidesmo",
+        0x000A: "Dangerous Things",
+        0x000B: "Feitian Technologies",
+        0x002A: "Magrathea",
+        0x0042: "GnuPG",
+        0x1337: "Warsaw Hackerspace",
+        0x2342: "Warpzone",
+        0x4354: "Confidential Technologies",
+        0x5443: "TIF-IT",
+        0x63AF: "Trustica",
+        0xAFAF: "ANSSI",
+        0xBA53: "c-base",
+        0xBD0E: "Paranoidlabs",
+        0xF517: "FSIJ",
+        0xF5EC: "F-Secure",
+    }
 
     def __init__(self, debug=False):
         self.debug = debug
@@ -158,7 +184,8 @@ class OpenPGPcard:
         #  self.pgpvermaj = int, OpenPGP application major version (3)
         #  self.pgpvermin = int, OpenPGP application minor version
         #  self.pgpverstr = string, OpenPGP application "maj.min"
-        #  self.manufacturer = string, hex string of the manufacturer ID "0xXXXX"
+        #  self.manufacturer_id = string, hex string of the manufacturer ID "0xXXXX"
+        #  self.manufacturer = string, name of the manufacturer (or "- unknown -")
         #  self.serial = int, serial number
         #  self.max_cmd : int, maximum command length
         #  self.max_rsp : int, maximum response length
@@ -257,11 +284,16 @@ class OpenPGPcard:
         self.pgpvermaj = resp[6]
         self.pgpvermin = resp[7]
         self.pgpverstr = f"{resp[6]}.{resp[7]}"
-        self.manufacturer = f"0x{resp[8]:02X}{resp[9]:02X}"
+        self.manufacturer_id = f"0x{resp[8]:02X}{resp[9]:02X}"
+        manufacturer_id_int = int(self.manufacturer_id, 16)
+        if manufacturer_id_int in OpenPGPcard.manufacturer_list:
+            self.manufacturer = OpenPGPcard.manufacturer_list[manufacturer_id_int]
+        else:
+            self.manufacturer = OpenPGPcard.default_manufacturer_name
         self.serial = int.from_bytes(resp[10:14], "big")
         if self.debug:
             print(f"PGP version : {self.pgpverstr}")
-            print(f"Manufacturer : {self.manufacturer}")
+            print(f"Manufacturer : {self.manufacturer} ({self.manufacturer_id})")
             print(f"Serial : {self.serial}")
 
     def get_length(self):
