@@ -178,7 +178,7 @@ class OpenPGPcard:
             self.get_features()
 
         else:
-            raise ConnectionException("Can't find any openPGP device connected.")
+            raise ConnectionException("Can't find any OpenPGP device connected.")
         # The object has the following attributes :
         #  self.name = str, name of the device (or the card reader used)
         #  self.pgpvermaj = int, OpenPGP application major version (3)

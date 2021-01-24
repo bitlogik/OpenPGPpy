@@ -1,13 +1,15 @@
-### OpenPGP smartcard communication library
 
 # OpenPGPpy
+
+
+### OpenPGP smartcard communication library
 
 A Python3 library to operate an OpenPGP device.
 
 Provides access methods in Python to an OpenPGP card application, as defined in  
 https://gnupg.org/ftp/specs/OpenPGP-smart-card-application-3.3.pdf
 
-No need to have GnuPG or similar binary, with OpenPGPpy one can setup and use a OpenPGP device (such as Yubico 5) right away in Python.
+No need to have GnuPG or similar binary, with OpenPGPpy one can setup and use an OpenPGP device (such as Yubico 5) right away in Python.
 
 
 ## Installation and requirements
@@ -28,15 +30,15 @@ On some Linux, starts PCSCd service
 (sudo) systemctl enable pcscd
 ```
 
-It uses PySCard, but this is listed in pip dependencies. So PySCard is automatically installed when you install this package. In Linux, We recommend to install PySCard using the distro package manager (see above).
+It uses Pyscard, but this is listed in pip dependencies. So Pyscard is automatically installed when you install this package. In Linux, We recommend to install Pyscard using the distro package manager (see above).
 
 ### Installation of this library
 
 Easiest way :  
-`python3 -m pip install openpgppy`  
+`python3 -m pip install OpenPGPpy`  
 
 From sources, download and run in this directory :  
-`python3 -m pip  install .`  
+`python3 -m pip  install .`
 
 ### Use
 
@@ -57,7 +59,7 @@ See demo and interface methods to get the full functions and details.
 
 #### Demo
 
-There are some demonstration scripts provided in the demo directory. They provide examples on how to use this library.
+There are some demonstration scripts provided in the *demo* directory. They provide examples on how to use this library.
 
 * reset.py : resets the OpenPGP device.
 * decrypt.py : Generates an X25519 key pair that is used to DECipher data (compute X25519 ECDH).
@@ -67,8 +69,7 @@ The *decrypt.py* script requires the pynacl library to check the device response
 
 The *sign.py* script requires openssl binary in the user path to check the device responses.
 
-Default PIN password for OpenPGP devices :
-
+Default PIN password for OpenPGP devices :  
 PIN1 : "123456"  
 PIN2 : "123456"  
 PIN3 : "12345678"
@@ -103,11 +104,11 @@ The created object has the following attributes :
 `OpenPGPcard.send_apdu( APDU )`  
 Sends full raw APDU, not supposed to be used by your scripts.  
 APDU is a list of integers or a byte array.  
-In case data are cut in parts with "61" code, it automatically sends "C0" command to get remaining data and recontructs the full data. Still, do not support extended length command yet (use command chaining).  
-Throws exception if answer status is not 0x9000.  
+In case data are cut in parts with "61" code, it automatically sends "C0" command to get remaining data and recontructs the full data. Still, do not support extended length command yet, it just use command chaining.  
+Throws a PGPCardException if answer status is not 0x9000.  
 Returns a bytearray of the card answer.
 
-`OpenPGPcard.select_data( filehex, P1=0, P2=4)`  
+`OpenPGPcard.select_data( filehex, P1=0, P2=4 )`  
 Selects a data object ("DO").  
 filehex is 1 or 2 bytes object address in hex (2-4 string hex).
 
@@ -116,7 +117,7 @@ Reads a data object ("DO").
 filehex is 1 or 2 bytes object address in hex (2-4 string hex).  
 Mostly used internally by others methods.
 
-`OpenPGPcard.get_next_data( filehex, P1=0, P2=0)`  
+`OpenPGPcard.get_next_data( filehex, P1=0, P2=0 )`  
 Continue reading in data object ("DO").  
 filehex is 1 or 2 bytes object address in hex (2-4 string hex).  
 
@@ -135,7 +136,7 @@ Internally called at instanciation. The max attributes loaded are not yet used b
 
 `OpenPGPcard.get_features()`  
 Reads and decode the optional General Feature Management (data object "7F74").  
-Internally called at instanciation. If not present, all features are supposed to be unavailable (attribute is False).
+Internally called at instanciation. If not present, all features are supposed to be unavailable (attributes are False).
 
 `OpenPGPcard.display_features()`  
 Prints the General Feature Management attributes.
@@ -164,15 +165,17 @@ Verify the PIN code : pin_bank is 1, 2 or 3 for respectively SW1, SW2 or SW3. PI
 
 `OpenPGPcard.get_pin_status( pin_bank )`  
 Reads PIN status : returns remaining tries left for the given PIN bank address (1, 2 or 3).  
-If 0 : PIN is blocked (no more tries), if 9000 : PIN has been verified (OK).
+Return value is 1, 2 or 3 : number of remaining tries before the PIN block.  
+Return value is 0 : PIN is blocked (no more tries).  
+Return value is 9000 : PIN has been verified (OK).
 
 `OpenPGPcard.gen_key( keypos_hex )`  
-Generates an assymetric key pair in keypos slot address, by calling the GENERATE ASYMMETRIC KEY PAIR command. keypos_hex is the key object address (Control Reference Template), 4 chars string (2 bytes address) : "B600" for sign key, "B800" for de/crypt key, "A400" for auth key.  
+Generates an assymetric key pair in a keypos slot address, by calling the GENERATE ASYMMETRIC KEY PAIR command. keypos_hex is the key object address (Control Reference Template) as 4 chars string (2 bytes address) : "B600" for sign key, "B800" for de/crypt key, "A400" for auth key.  
 Usually, the device reponds with the related public key of the key generated.  
 Requires the PIN3 "PUK" verified.
 
 `OpenPGPcard.get_public_key( keypos_hex )`  
-Reads the public key in keypos slot address, by calling the GENERATE ASYMMETRIC KEY PAIR command. keypos_hex is the key object address (Control Reference Template), 4 chars string "hex" (2 bytes address) : "B600" for sign key ref1, "B800" for de/crypt key ref2, "A400" for auth key ref3.  
+Reads the public key in keypos slot address, by calling the GENERATE ASYMMETRIC KEY PAIR command (with the read pubkey flag). keypos_hex is the key object address (Control Reference Template) as 4 chars string "hex" (2 bytes address) : "B600" for sign key ref1, "B800" for de/crypt key ref2, "A400" for auth key ref3.  
 Requires the related PIN verified.
 
 `OpenPGPcard.sign( data )`  
@@ -194,8 +197,8 @@ Requires the PIN2 verified.
 See the OpenPGP application standard for more details.
 
 `OpenPGPcard.decipher_25519( external_publickey )`  
-Decrypts data with the internal device DECryption key as Curve25519. Obviously requires the DEC key to be a Curve25519 key pair ("122B060104019755010501" in "C2"). As DECIPHER with EC, the device doesn\'t decrypt data, but computes the private "shared" symmetric key with ECDH. Still quite like RSA where the decrypted data is also the private "shared" symmetric key.  
-external_publickey provided is "x" 32 bytes, as bytes. It performs an ECDH with the provided public key and the internal device DECryption private key.  
+Decrypts data with the internal device DECryption key with X25519 (Curve25519 ECDH). Obviously, requires the DEC key to be a Curve25519 key pair ("122B060104019755010501" in "C2"). As DECIPHER with EC, the device doesn\'t decrypt data, but computes the private "shared" symmetric key with ECDH. Still quite like RSA where the decrypted data is also the private shared symmetric key.  
+external_publickey argument is "x" 32 bytes, as bytes. It performs an ECDH with the provided public key and the internal device DECryption private key.  
 Requires the PIN2 verified.  
 
 
