@@ -279,8 +279,12 @@ class OpenPGPcard:
     def get_identifier(self):
         # Full application identifier
         resp = self.get_data("4F")
-        assert len(resp) == 16
-        assert resp[:6] == OpenPGPcard.AppID
+        if len(resp) != 16:
+            raise DataException("Application identifier data shall be 16 bytes long.")
+        if resp[:6] != OpenPGPcard.AppID:
+            raise DataException(
+                "Start of application identifier data shall be the OpenGPG AID."
+            )
         self.pgpvermaj = resp[6]
         self.pgpvermin = resp[7]
         self.pgpverstr = f"{resp[6]}.{resp[7]}"
@@ -303,9 +307,11 @@ class OpenPGPcard:
         self.max_rsp = 256
         if self.pgpvermaj >= 3:
             resp = self.get_data("7F66")
-            assert len(resp) == 8
-            self.max_cmd = int.from_bytes(resp[2:4], "big")
-            self.max_rsp = int.from_bytes(resp[6:8], "big")
+            if len(resp) == 8:  # Simple DO
+                self.max_cmd = int.from_bytes(resp[2:4], "big")
+                self.max_rsp = int.from_bytes(resp[6:8], "big")
+            else:
+                raise DataException("Extended length info incorrect format.")
 
     def get_features(self):
         # Features optional DO 7F74
@@ -325,8 +331,10 @@ class OpenPGPcard:
                     self.display_features()
                 return
             raise
-        assert resp[:2] == [0x81, 1]
-        assert len(resp) == 3
+        if resp[:2] != [0x81, 1]:
+            raise DataException("Features data shall start with 0x81 0x01.")
+        if len(resp) != 3:
+            raise DataException("Features data shall be 3 bytes long.")
         feature_int = resp[2]
 
         def check_bit(integ, bit_pos):
