@@ -310,6 +310,9 @@ class OpenPGPcard:
             if len(resp) == 8:  # Simple DO
                 self.max_cmd = int.from_bytes(resp[2:4], "big")
                 self.max_rsp = int.from_bytes(resp[6:8], "big")
+            elif len(resp) == 11 and resp[:3] == [0x7F, 0x66, 8]:  # Constructed DO
+                self.max_cmd = int.from_bytes(resp[5:7], "big")
+                self.max_rsp = int.from_bytes(resp[9:11], "big")
             else:
                 raise DataException("Extended length info incorrect format.")
 
@@ -331,6 +334,8 @@ class OpenPGPcard:
                     self.display_features()
                 return
             raise
+        if resp[:3] == [0x7F, 0x74, 3]: # Turn constructed DO to simple DO
+            resp = resp[3:]
         if resp[:2] != [0x81, 1]:
             raise DataException("Features data shall start with 0x81 0x01.")
         if len(resp) != 3:
