@@ -33,11 +33,11 @@ class PGPBaseException(Exception):
 
 
 class PGPCardException(PGPBaseException):
-    def __init__(self, sw1, sw2):
-        self.sw1 = sw1
-        self.sw2 = sw2
-        self.sw = sw1 * 256 + sw2
-        self.message = "Error: 0x%02x%02x" % (sw1, sw2)
+    def __init__(self, sw_byte1, sw_byte2):
+        self.sw_byte1 = sw_byte1
+        self.sw_byte2 = sw_byte2
+        self.sw_code = (sw_byte1 << 8) | sw_byte2
+        self.message = "Error: 0x%02x%02x" % (sw_byte1, sw_byte2)
         super().__init__(self.message)
 
 
@@ -86,7 +86,7 @@ def check_hex(func):
             BadInputException("filehex provided must be a string")
         args_list = [*args]
         if len(args_list[1]) == 2:
-            # A single byte address : P1=0
+            # A single byte address : param_1=0
             args_list[1] = "00" + args_list[1]
         if len(args_list[1]) != 4 or not ishex(args_list[1]):
             raise BadInputException("filehex provided must be 2 or 4 hex chars")
@@ -152,14 +152,14 @@ class OpenPGPcard:
                         print("Trying with reader :", reader)
                     self.connection = reader.createConnection()
                     self.connection.connect()
-                    APDU_select = [
+                    apdu_select = [
                         0x00,
                         0xA4,
                         0x04,
                         0x00,
                         len(OpenPGPcard.AppID),
                     ] + OpenPGPcard.AppID
-                    self.send_apdu(APDU_select)
+                    self.send_apdu(apdu_select)
                     reader_detected = hasattr(self, "connection")
                 except Exception:
                     if debug:
@@ -203,77 +203,91 @@ class OpenPGPcard:
         if hasattr(self, "connection"):
             del self.connection
 
-    def send_apdu(self, APDU):
-        # send APDU. APDU is a list of integers
-        # [ INS, CLA, P1, P2, Len, data...]
+    def send_apdu(self, apdu):
+        # send APDU. apdu is a list of integers (uint 8 array/list)
+        # [ INS, CLA, param_1, param_2, Len, data...]
         if self.debug:
-            print(" Sending %i bytes data" % (len(APDU) - 5))
-            print(f"-> {toHexString(APDU)}")
+            print(f" Sending 0x{apdu[1]:X} command with {(len(apdu) - 5)} bytes data")
+            print(f"-> {toHexString(apdu)}")
             t_env = time.time()
-        data, sw1, sw2 = self.connection.transmit(APDU)
+        data, sw_byte1, sw_byte2 = self.connection.transmit(apdu)
         if self.debug:
             t_ans = (time.time() - t_env) * 1000
             print(
                 " Received %i bytes data : SW 0x%02X%02X - duration: %.1f ms"
-                % (len(data), sw1, sw2, t_ans)
+                % (len(data), sw_byte1, sw_byte2, t_ans)
             )
             if len(data) > 0:
                 print(f"<- {toHexString(data)}")
-        while sw1 == 0x61:
+        while sw_byte1 == 0x61:
             if self.debug:
                 t_env = time.time()
-            datacompl, sw1, sw2 = self.connection.transmit([0x00, 0xC0, 0, 0, 0])
+            datacompl, sw_byte1, sw_byte2 = self.connection.transmit(
+                [0x00, 0xC0, 0, 0, 0]
+            )
             if self.debug:
                 t_ans = int((time.time() - t_env) * 10000) / 10.0
                 print(
                     " Received remaining %i bytes : 0x%02X%02X - duration: %.1f ms"
-                    % (len(datacompl), sw1, sw2, t_ans)
+                    % (len(datacompl), sw_byte1, sw_byte2, t_ans)
                 )
                 print(f"<- {toHexString(datacompl)}")
             data += datacompl
-        if sw1 == 0x63 and sw2 & 0xF0 == 0xC0:
-            raise PinException(sw2 - 0xC0)
-        if sw1 != 0x90 or sw2 != 0x00:
-            raise PGPCardException(sw1, sw2)
+        if sw_byte1 == 0x63 and sw_byte2 & 0xF0 == 0xC0:
+            raise PinException(sw_byte2 - 0xC0)
+        if sw_byte1 != 0x90 or sw_byte2 != 0x00:
+            raise PGPCardException(sw_byte1, sw_byte2)
         return data
 
     @check_hex
-    def select_data(self, filehex, P1=0, P2=4):
+    def select_data(self, filehex, param_1=0, param_2=4):
         # Select a data object : filehex is 2 bytes (4 string hex)
-        APDU_command = [0x00, 0xA5, P1, P2, 0x06, 0x60, 0x04, 0x5C, 0x02] + toBytes(
-            filehex
-        )
-        self.send_apdu(APDU_command)
+        apdu_command = [
+            0x00,
+            0xA5,
+            param_1,
+            param_2,
+            0x06,
+            0x60,
+            0x04,
+            0x5C,
+            0x02,
+        ] + toBytes(filehex)
+        self.send_apdu(apdu_command)
 
     @check_hex
     def get_data(self, filehex, data_hex=""):
         # Binary read / ISO read the object
         if self.debug:
             print(f"Read Data {data_hex} in 0x{filehex}")
-        P1 = int(filehex[0:2], 16)
-        P2 = int(filehex[2:4], 16)
-        APDU_command = [0x00, 0xCA, P1, P2, len(data_hex) // 2] + toBytes(data_hex)
-        dataresp = self.send_apdu(APDU_command)
+        param_1 = int(filehex[0:2], 16)
+        param_2 = int(filehex[2:4], 16)
+        apdu_command = [0x00, 0xCA, param_1, param_2, len(data_hex) // 2] + toBytes(
+            data_hex
+        )
+        dataresp = self.send_apdu(apdu_command)
         return dataresp
 
-    def get_next_data(self, P1=0, P2=0, data_hex=""):
+    def get_next_data(self, param_1=0, param_2=0, data_hex=""):
         # continue read
         if self.debug:
             print("Read next data", data_hex)
-        APDU_command = [0x00, 0xCC, P1, P2, len(data_hex) // 2] + toBytes(data_hex)
-        blkdata = self.send_apdu(APDU_command)
+        apdu_command = [0x00, 0xCC, param_1, param_2, len(data_hex) // 2] + toBytes(
+            data_hex
+        )
+        blkdata = self.send_apdu(apdu_command)
         return blkdata
 
     @check_hex
     def put_data(self, filehex, data_hex=""):
         if self.debug:
             print(f"Put data {data_hex} in 0x{filehex}")
-        P1 = int(filehex[0:2], 16)
-        P2 = int(filehex[2:4], 16)
-        APDU_command = [0x00, 0xDA, P1, P2, len(data_hex) // 2] + toBytes(
+        param_1 = int(filehex[0:2], 16)
+        param_2 = int(filehex[2:4], 16)
+        apdu_command = [0x00, 0xDA, param_1, param_2, len(data_hex) // 2] + toBytes(
             data_hex
         )  # or DB
-        blkdata = self.send_apdu(APDU_command)
+        blkdata = self.send_apdu(apdu_command)
         return blkdata
 
     def get_identifier(self):
@@ -329,7 +343,7 @@ class OpenPGPcard:
         try:
             resp = self.get_data("7F74")
         except PGPCardException as exc:
-            if exc.sw == 0x6B00 or exc.sw == 0x6A88:
+            if exc.sw_code == 0x6B00 or exc.sw_code == 0x6A88:
                 if self.debug:
                     self.display_features()
                 return
@@ -400,8 +414,8 @@ class OpenPGPcard:
     def activate_file(self):
         self.send_apdu([0, 0x44, 0, 0, 0])
 
-    def reset(self, PIN3):
-        self.verify_pin(3, PIN3)
+    def reset(self, pin3):
+        self.verify_pin(3, pin3)
         self.terminate_df()
         self.activate_file()
 
@@ -420,15 +434,16 @@ class OpenPGPcard:
         except PinException as exc:
             return exc.retries_left
         except PGPCardException as exc:
-            if exc.sw == 0x6983:
+            if exc.sw_code == 0x6983:
                 return 0
             raise
 
-    def verify_pin(self, pin_bank, PIN):
+    def verify_pin(self, pin_bank, pin_string):
         # Verify PIN code : pin_bank is 1, 2 or 3 for SW1, SW2 or SW3
-        if PIN:
+        if pin_string:
             self.send_apdu(
-                [0, 0x20, 0, 0x80 + pin_bank, len(PIN)] + to_list(PIN.encode("ascii"))
+                [0, 0x20, 0, 0x80 + pin_bank, len(pin_string)]
+                + to_list(pin_string.encode("ascii"))
             )
         else:
             self.send_apdu([0, 0x20, 0, 0x80 + pin_bank, 0])

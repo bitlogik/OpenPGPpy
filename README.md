@@ -101,14 +101,14 @@ The created object has the following attributes :
 * .mic : bool, has a microphone?
 * .touchscreen : bool, has a touchscreen?
 
-`OpenPGPcard.send_apdu( APDU )`  
+`OpenPGPcard.send_apdu( apdu )`  
 Sends full raw APDU, not supposed to be used by your scripts.  
 APDU is a list of integers or a byte array.  
 In case data are cut in parts with "61" code, it automatically sends "C0" command to get remaining data and recontructs the full data. Still, do not support extended length command yet, it just use command chaining.  
 Throws a PGPCardException if answer status is not 0x9000.  
 Returns a bytearray of the card answer.
 
-`OpenPGPcard.select_data( filehex, P1=0, P2=4 )`  
+`OpenPGPcard.select_data( filehex, param_1=0, param_2=4 )`  
 Selects a data object ("DO").  
 filehex is 1 or 2 bytes object address in hex (2-4 string hex).
 
@@ -117,7 +117,7 @@ Reads a data object ("DO").
 filehex is 1 or 2 bytes object address in hex (2-4 string hex).  
 Mostly used internally by others methods.
 
-`OpenPGPcard.get_next_data( filehex, P1=0, P2=0 )`  
+`OpenPGPcard.get_next_data( filehex, param_1=0, param_2=0 )`  
 Continue reading in data object ("DO").  
 filehex is 1 or 2 bytes object address in hex (2-4 string hex).  
 
@@ -154,14 +154,14 @@ Send the TERMINATE DF command. Used to reset the card.
 `OpenPGPcard.activate_file()`  
 Send the ACTIVATE FILE command. Used to reset the card.
 
-`OpenPGPcard.reset( PIN3 )`  
+`OpenPGPcard.reset( pin3 )`  
 Fully reset the device. Requires the "PUK" PIN #3 as a string.
 
 `OpenPGPcard.get_random( data_length )`  
 Reads random data from the device, using the GET CHALLENGE command (data_length bytes long).
 
-`OpenPGPcard.verify_pin( pin_bank, PIN )`  
-Verify the PIN code : pin_bank is 1, 2 or 3 for respectively SW1, SW2 or SW3. PIN is a string with the PIN.
+`OpenPGPcard.verify_pin( pin_bank, pin )`  
+Verify the PIN code : pin_bank is 1, 2 or 3 for respectively SW1, SW2 or SW3. pin is a string with the PIN.
 
 `OpenPGPcard.get_pin_status( pin_bank )`  
 Reads PIN status : returns remaining tries left for the given PIN bank address (1, 2 or 3).  

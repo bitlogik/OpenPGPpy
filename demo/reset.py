@@ -37,7 +37,7 @@ def main():
     try:
         mydevice.reset(PIN3)
     except OpenPGPpy.PGPCardException as exc:
-        if exc.sw == 0x6982 or exc.sw == 0x6A80:
+        if exc.sw_code == 0x6982 or exc.sw_code == 0x6A80:
             print("Error: Wrong PUK")
         return
     print("Reset done.")

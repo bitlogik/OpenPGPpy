@@ -70,7 +70,7 @@ def main():
     try:
         pubkey_card = mydevice.get_public_key("B800")
     except OpenPGPpy.PGPCardException as exc:
-        if exc.sw != 0x6581 and exc.sw != 0x6A88:
+        if exc.sw_code != 0x6581 and exc.sw_code != 0x6A88:
             raise
     if pubkey_card is None:
         print("Setup the new device")
@@ -78,14 +78,14 @@ def main():
         try:
             mydevice.verify_pin(3, PIN3)
         except OpenPGPpy.PGPCardException as exc:
-            if exc.sw == 0x6982 or exc.sw == 0x6A80:
+            if exc.sw_code == 0x6982 or exc.sw_code == 0x6A80:
                 print("Error: Wrong PUK")
             return
         # Setup X25519 for decrypt "confidentiality" key
         try:
             mydevice.put_data("00C2", "122B060104019755010501")
         except OpenPGPpy.PGPCardException as exc:
-            if exc.sw == 0x6A80:
+            if exc.sw_code == 0x6A80:
                 raise Exception("This device is not compatible with X25519.") from exc
             raise
         # Generate key for decrypt ("confidentiality")
@@ -99,16 +99,16 @@ def main():
     try:
         mydevice.verify_pin(2, PIN2)
     except OpenPGPpy.PGPCardException as exc:
-        if exc.sw == 0x6982:
+        if exc.sw_code == 0x6982:
             print("Error: Wrong PIN")
             # buggy ?
             # remain = mydevice.get_pin_status(2)
             # print(f"{remain} tries remaining")
             return
-        if exc.sw == 0x6A80:
+        if exc.sw_code == 0x6A80:
             print("Error: Incorrect PIN format")
             return
-        if exc.sw == 0x6983:
+        if exc.sw_code == 0x6983:
             print("Error: PIN 2 is blocked")
             return
         raise
