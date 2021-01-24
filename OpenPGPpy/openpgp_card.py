@@ -299,8 +299,8 @@ class OpenPGPcard:
     def get_length(self):
         # Extended length info DO 7F66 : 0202 xxxx 0202 xxxx
         #  Also bit 7 in Application Data "0x73"
-        self.max_cmd = 250
-        self.max_rsp = 253
+        self.max_cmd = 256
+        self.max_rsp = 256
         if self.pgpvermaj >= 3:
             resp = self.get_data("7F66")
             assert len(resp) == 8
