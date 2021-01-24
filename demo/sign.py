@@ -84,8 +84,10 @@ def main():
     try:
         pubkey_card_all = mydevice.get_public_key("B600")
     except OpenPGPpy.PGPCardException as exc:
+        # SW = 0x6581 or 0x6A88 ?
         if exc.sw_code != 0x6581 and exc.sw_code != 0x6A88:
             raise
+        # SIGn key was not created, continue to setup this key
     if pubkey_card_all is None:
         print("Setup the new device")
         PIN3 = getpass.getpass("Enter PIN3 (PUK) : ")

@@ -286,7 +286,7 @@ class OpenPGPcard:
         param_2 = int(filehex[2:4], 16)
         apdu_command = [0x00, 0xDA, param_1, param_2, len(data_hex) // 2] + toBytes(
             data_hex
-        )  # or DB
+        )  # or 0xDB command
         blkdata = self.send_apdu(apdu_command)
         return blkdata
 
@@ -348,7 +348,7 @@ class OpenPGPcard:
                     self.display_features()
                 return
             raise
-        if resp[:3] == [0x7F, 0x74, 3]: # Turn constructed DO to simple DO
+        if resp[:3] == [0x7F, 0x74, 3]:  # Turn constructed DO to simple DO
             resp = resp[3:]
         if resp[:2] != [0x81, 1]:
             raise DataException("Features data shall start with 0x81 0x01.")
