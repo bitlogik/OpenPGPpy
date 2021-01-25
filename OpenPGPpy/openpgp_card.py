@@ -37,7 +37,7 @@ class PGPCardException(PGPBaseException):
         self.sw_byte1 = sw_byte1
         self.sw_byte2 = sw_byte2
         self.sw_code = (sw_byte1 << 8) | sw_byte2
-        self.message = "Error: 0x%02x%02x" % (sw_byte1, sw_byte2)
+        self.message = "Error status : 0x%02X%02X" % (sw_byte1, sw_byte2)
         super().__init__(self.message)
 
 
