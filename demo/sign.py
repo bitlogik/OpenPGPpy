@@ -114,9 +114,9 @@ def main():
     print('Device "SIG" public key read')
 
     # Open key for SIGn (ECDSA)
-    PIN2 = getpass.getpass("Enter PIN1 : ")
+    PIN1 = getpass.getpass("Enter PIN1 : ")
     try:
-        mydevice.verify_pin(1, PIN2)
+        mydevice.verify_pin(1, PIN1)
     except OpenPGPpy.PGPCardException as exc:
         if exc.sw_code == 0x6982:
             print("Error: Wrong PIN")
