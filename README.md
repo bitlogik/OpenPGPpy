@@ -63,7 +63,7 @@ There are some demonstration scripts provided in the *demo* directory. They prov
 
 * reset.py : resets the OpenPGP device.
 * decrypt.py : Generates an X25519 key pair that is used to DECipher data (compute X25519 ECDH).
-* sign.py : Generates a 256k1 key pair, then used to sign data.
+* sign.py : Generates a 256k1 key pair, then uses it to sign data.
 
 The *decrypt.py* script requires the pynacl library to check the device responses. This can be installed with the "dev" dependencies part of this package `python3 -m pip  install .["dev"]` or just `python3 -m pip  install pynacl`.
 
@@ -229,4 +229,4 @@ See the GNU General Public License for more details.
 
 ## Support
 
-Open an issue for help about its use.
+Open an issue in the Github repository for help about its use.

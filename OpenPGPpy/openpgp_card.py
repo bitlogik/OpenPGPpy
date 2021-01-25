@@ -451,6 +451,9 @@ class OpenPGPcard:
     @check_hex
     def gen_key(self, keypos_hex):
         # Generate an assymetric key pair in keypos slot address
+        #  Digital signature : 0xB600 : gen key according to algorithm data in C1
+        #  Confidentiality :   0xB800 : gen key according to algorithm data in C2
+        #  Authentication  :   0xA400 : gen key according to algorithm data in C3
         return bytes(self.send_apdu([0, 0x47, 0x80, 0, 2] + toBytes(keypos_hex)))
 
     @check_hex
