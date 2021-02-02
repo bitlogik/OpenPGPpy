@@ -137,16 +137,25 @@ class OpenPGPcard:
         0xF5EC: "F-Secure",
     }
 
-    def __init__(self, debug=False):
+    def __init__(self, debug=False, reader_index=None):
         self.debug = debug
-        reader_detected = None
+        applet_detected = False
         readers_list = readers()
         if len(readers_list) > 0:
             if debug:
-                print("Trying to reach OpenPGP app")
+                if reader_index is None:
+                    print("Trying to reach OpenPGP app in all readers")
                 print("Available readers :")
                 print_list(readers_list)
+            if reader_index is not None:
+                if len(readers_list) > reader_index:
+                    readers_list = readers_list[reader_index: reader_index + 1]
+                else:
+                    raise ConnectionException("Reader index out of readers detected")
+                if debug:
+                    print(f"Using reader index #{reader_index}")
             for reader in readers_list:
+                applet_detected = False
                 try:
                     if debug:
                         print("Trying with reader :", reader)
@@ -160,17 +169,19 @@ class OpenPGPcard:
                         len(OpenPGPcard.AppID),
                     ] + OpenPGPcard.AppID
                     self.send_apdu(apdu_select)
-                    reader_detected = hasattr(self, "connection")
+                    applet_detected = hasattr(self, "connection")
                 except Exception:
                     if debug:
                         print("Fail with this reader")
+                    if reader_index is not None:
+                        raise ConnectionException("No OpenPGP applet on this reader.")
                     continue
-                if reader_detected:
+                if applet_detected:
                     if debug:
-                        print("A device detected, using", reader.name)
+                        print("An OpenPGP applet detected, using", reader.name)
                     self.name = reader.name
                     break
-        if reader_detected:
+        if applet_detected:
             # Read device info
             self.get_application_data()
             self.get_identifier()

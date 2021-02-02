@@ -51,7 +51,7 @@ Basic example :
 ```
 import OpenPGPpy
 mydevice = OpenPGPpy.OpenPGPcard()
-mydevice.verify_pin(1, PIN)
+mydevice.verify_pin(1, "123456")
 mydevice.sign(hash_to_sign)
 ```
 
@@ -77,10 +77,12 @@ PIN3 : "12345678"
 
 ## Interface Methods
 
-`OpenPGPcard( debug=False )`  
+`OpenPGPcard( debug=False, reader_index=None )`  
 Initializes the OpenPGP device object.  
 if debug = True it displays verbosely all communications with the card.  
-Connects to all readers seeking for an OpenPGP card, selects the app and loads its capabilities.
+Connects to all readers seeking for an OpenPGP card, selects the app and loads its capabilities.  
+reader_index = None : the constructor will use the first OpenPGP card available in any readers slots detected.  
+reader_index = positive integer : will try to use the given reader/card at the given index (starts at 0).
 
 The created object has the following attributes :
 * .name : str, name of the device (or the card reader used)
