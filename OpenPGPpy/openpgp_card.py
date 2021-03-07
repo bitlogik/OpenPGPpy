@@ -449,8 +449,25 @@ class OpenPGPcard:
                 return 0
             raise
 
+    def change_pin(self, old_pin, new_pin, pin_index):
+        # Change PIN index number (index : 1 or 3)
+        if pin_index not in (3, 1):
+            raise DataException("Bad PIN index, must be 1 or 3.")
+        old_pin_bin = old_pin.encode("utf8")
+        new_pin_bin = new_pin.encode("utf8")
+        pin_min_len = 6
+        if pin_index == 3:
+            pin_min_len = 8
+        if len(old_pin_bin) < pin_min_len or len(new_pin_bin) < pin_min_len:
+            raise BadInputException(
+                f"Bad PIN #{pin_index} length, must be {pin_min_len} bytes."
+            )
+        data = old_pin_bin + new_pin_bin
+        self.send_apdu([0, 0x24, 0, 0x80 + pin_index, len(data)] + to_list(data))
+
     def verify_pin(self, pin_bank, pin_string):
         # Verify PIN code : pin_bank is 1, 2 or 3 for SW1, SW2 or SW3
+        # Call CHANGE REFERENCE DATA card command
         if pin_bank not in (1, 2, 3):
             raise DataException("Bad PIN index, must be 1, 2 or 3.")
         if pin_string:
