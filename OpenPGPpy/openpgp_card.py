@@ -454,7 +454,7 @@ class OpenPGPcard:
         if pin_string:
             self.send_apdu(
                 [0, 0x20, 0, 0x80 + pin_bank, len(pin_string)]
-                + to_list(pin_string.encode("ascii"))
+                + to_list(pin_string.encode("utf8"))
             )
         else:
             self.send_apdu([0, 0x20, 0, 0x80 + pin_bank, 0])
