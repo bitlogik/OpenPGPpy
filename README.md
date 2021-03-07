@@ -162,6 +162,10 @@ Fully reset the device. Requires the "PUK" PIN #3 as a string.
 `OpenPGPcard.get_random( data_length )`  
 Reads random data from the device, using the GET CHALLENGE command (data_length bytes long).
 
+`OpenPGPcard.change_pin( old_pin, new_pin, pin_bank )`  
+Change the PIN in the bank 1 or 3 (PIN1 or PIN3). old_pin and new_pin are strings.  
+Minimum PIN length is 6 chars for PIN1, 8 chars for PIN3.
+
 `OpenPGPcard.verify_pin( pin_bank, pin )`  
 Verify the PIN code : pin_bank is 1, 2 or 3 for respectively SW1, SW2 or SW3. pin is a string with the PIN.
 
