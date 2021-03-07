@@ -451,6 +451,8 @@ class OpenPGPcard:
 
     def verify_pin(self, pin_bank, pin_string):
         # Verify PIN code : pin_bank is 1, 2 or 3 for SW1, SW2 or SW3
+        if pin_bank not in (1, 2, 3):
+            raise DataException("Bad PIN index, must be 1, 2 or 3.")
         if pin_string:
             self.send_apdu(
                 [0, 0x20, 0, 0x80 + pin_bank, len(pin_string)]
