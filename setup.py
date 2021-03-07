@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # OpenPGPpy : setup data
-# Copyright (C) 2020  BitLogiK
+# Copyright (C) 2020-2021  BitLogiK
 
 from setuptools import setup, find_packages
 
@@ -11,7 +11,7 @@ with open("README.md") as readme_file:
 
 setup(
     name="OpenPGPpy",
-    version="0.3",
+    version="0.4",
     description="OpenPGP smartcard communication library",
     long_description=readme + "\n\n",
     long_description_content_type="text/markdown",
@@ -20,7 +20,7 @@ setup(
     author_email="contact@bitlogik.fr",
     url="https://github.com/bitlogik/OpenPGPpy",
     license="GPLv3",
-    python_requires=">=3.6,<3.9",
+    python_requires=">=3.6",
     install_requires=["pyscard"],
     extras_require={"dev": ["PyNaCl==1.4.0"]},
     package_data={},
