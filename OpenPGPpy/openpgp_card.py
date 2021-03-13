@@ -493,7 +493,10 @@ class OpenPGPcard:
 
     def sign(self, data):
         # Sign data, with Compute Digital Signature command
-        return bytes(self.send_apdu([0, 0x2A, 0x9E, 0x9A, len(data)] + to_list(data)))
+        if len(data) < 256:
+            return bytes(self.send_apdu([0, 0x2A, 0x9E, 0x9A, len(data)] + to_list(data)))
+        else:
+            return bytes(self.send_apdu([0, 0x2A, 0x9E, 0x9A, 0, len(data) >> 8, len(data) & 0xFF] + to_list(data)))
 
     def sign_ec_der(self, hashdata):
         # Sign with ECDSA hash data and output signature as ASN1 DER encoded
