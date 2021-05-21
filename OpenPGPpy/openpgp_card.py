@@ -127,6 +127,7 @@ class OpenPGPcard:
         0x0042: "GnuPG",
         0x1337: "Warsaw Hackerspace",
         0x2342: "Warpzone",
+        0x2C97: "Ledger",
         0x4354: "Confidential Technologies",
         0x5443: "TIF-IT",
         0x63AF: "Trustica",
