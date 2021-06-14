@@ -481,7 +481,7 @@ class OpenPGPcard:
 
     @check_hex
     def gen_key(self, keypos_hex):
-        # Generate an assymetric key pair in keypos slot address
+        # Generate an asymmetric key pair in keypos slot address
         #  Digital signature : 0xB600 : gen key according to algorithm data in C1
         #  Confidentiality :   0xB800 : gen key according to algorithm data in C2
         #  Authentication  :   0xA400 : gen key according to algorithm data in C3
@@ -498,7 +498,7 @@ class OpenPGPcard:
 
     def sign_ec_der(self, hashdata):
         # Sign with ECDSA hash data and output signature as ASN1 DER encoded
-        # ec_size is the size in bits of the EC key
+        # hashdata is the same size in bits of the EC key
         return der_coding.encode_der(self.sign(hashdata))
 
     def encipher(self):

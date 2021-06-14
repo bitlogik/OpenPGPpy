@@ -99,6 +99,7 @@ def main():
             return
         # Setup EC256k1 for SIG key
         try:
+            # C1 <- SECP256k1 curve OID = 1.3.132.0.10
             mydevice.put_data("00C1", "132B8104000A")
         except OpenPGPpy.PGPCardException as exc:
             if exc.sw_code == 0x6A80:

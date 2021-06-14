@@ -83,6 +83,7 @@ def main():
             return
         # Setup X25519 for decrypt "confidentiality" key
         try:
+            # C2 <- X25519 OID = 1.3.6.1.4.1.3029.1.5.1
             mydevice.put_data("00C2", "122B060104019755010501")
         except OpenPGPpy.PGPCardException as exc:
             if exc.sw_code == 0x6A80:
