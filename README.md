@@ -52,7 +52,7 @@ Basic example :
 import OpenPGPpy
 mydevice = OpenPGPpy.OpenPGPcard()
 mydevice.verify_pin(1, "123456")
-mydevice.sign(hash_to_sign)
+mydevice.sign(hash_or_msg_to_sign)
 ```
 
 See demo and interface methods to get the full functions and details.
@@ -64,10 +64,13 @@ There are some demonstration scripts provided in the *demo* directory. They prov
 * reset.py : resets the OpenPGP device.
 * decrypt.py : Generates an X25519 key pair that is used to DECipher data (compute X25519 ECDH).
 * sign.py : Generates a 256k1 key pair, then uses it to sign data.
+* signEd.py : Generates a Ed25519 key pair, then uses it to sign data.
 
-The *decrypt.py* script requires the pynacl library to check the device responses. This can be installed with the "dev" dependencies part of this package `python3 -m pip  install .["dev"]` or just `python3 -m pip  install pynacl`.
+The *decrypt.py* and *signEd.py* scripts require the pynacl library to check the device responses. This can be installed with the "dev" dependencies part of this package `python3 -m pip  install .["dev"]` or just `python3 -m pip install pynacl`.
 
 The *sign.py* script requires openssl binary in the user path to check the device responses.
+
+*sign* and *signEd* can't be used together. Perform a reset of the card between one and the other.
 
 Default PIN password for OpenPGP devices :  
 PIN1 : "123456"  
@@ -103,10 +106,15 @@ The created object has the following attributes :
 * .mic : bool, has a microphone?
 * .touchscreen : bool, has a touchscreen?
 
-`OpenPGPcard.send_apdu( apdu )`  
+`OpenPGPcard.send_apdu( apduHeader, Data, ExpLongResp=0 )`  
 Sends full raw APDU, not supposed to be used by your scripts.  
-APDU is a list of integers or a byte array.  
-In case data are cut in parts with "61" code, it automatically sends "C0" command to get remaining data and recontructs the full data. Still, do not support extended length command yet, it just use command chaining.  
+apduHeader and Data are lists of integers or bytesarray.  
+apduHeader is [ INS, CLA, P1, P2 ] ISO7816 APDU header, without length info (Lc nor Le).  
+Data is bytes list of the command data  
+ExpLongResp is optional integer, the expected response length. Required when sending a short command and receiving long data back.  
+In case data are cut in parts with "61" code, it automatically sends "C0" command to get remaining data and recontructs the full data.  
+Extended frame length is automatically managed.  
+*Note* if an extended data frame response is expected from a short command, the query command must be called with the ExpLongResp argument equals to 65536. Because the ISO7816 standard only allows symmetric type of communication (extended sent, extended received), and this is the easy way to force the command to be sent with an extended format.  
 Throws a PGPCardException if answer status is not 0x9000.  
 Returns a bytearray of the card answer.
 
@@ -191,7 +199,7 @@ Requires the PIN1 verified.
 See the OpenPGP application standard for more details about data format.
 
 `OpenPGPcard.sign_ec_der( datahash )`
-EC signs with the internal device SIGn key the hash datahash (bytes) and outputs the signature as ASN1 DER encoded (bytes). Requires the SIG key to be an EC type key pair ("13..." in "C1").  
+ECDSA signs with the internal device SIGn key the hash datahash (bytes) and outputs the signature as ASN1 DER encoded (bytes). Requires the SIG key to be an EC type key pair ("13..." in "C1").  
 Requires the PIN1 verified.
 
 `OpenPGPcard.decipher( data )`  
@@ -224,12 +232,11 @@ See the GNU General Public License for more details.
 
 ## ToDo
 
-* Extended length command / responses
 * Secure Messaging
 * Decode Application Related Data to load capabilities and current key types
 * Verify
 * Sign helpers (RSA Tag/DSI)
-* Encipher with AES data
+* Encipher
 * Make it more user friendly with more abstraction layers and data list, for example set_key(2, "X25519") sends PUT_DATA("122B060104019755010501") in "C2"
 
 
