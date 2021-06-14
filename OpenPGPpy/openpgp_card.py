@@ -238,7 +238,7 @@ class OpenPGPcard:
                 [0x00, 0xC0, 0, 0, 0]
             )
             if self.debug:
-                t_ans = int((time.time() - t_env) * 10000) / 10.0
+                t_ans = (time.time() - t_env) * 1000
                 print(
                     " Received remaining %i bytes : 0x%02X%02X - duration: %.1f ms"
                     % (len(datacompl), sw_byte1, sw_byte2, t_ans)
