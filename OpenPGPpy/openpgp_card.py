@@ -150,7 +150,7 @@ class OpenPGPcard:
                 print_list(readers_list)
             if reader_index is not None:
                 if len(readers_list) > reader_index:
-                    readers_list = readers_list[reader_index: reader_index + 1]
+                    readers_list = readers_list[reader_index : reader_index + 1]
                 else:
                     raise ConnectionException("Reader index out of readers detected")
                 if debug:
