@@ -76,9 +76,11 @@ def ishex(istring):
 
 
 def check_hex(func):
-    # Decorator to check the first method argument
-    #  is 2/4 string hex (a DO short address)
-    # Expands the hex string from 2 to 4 hex chars (adds leading 0)
+    """Decorator to check the first method argument
+      is 2/4 string hex (a DO short address)
+    Expands the hex string from 2 to 4 hex chars (adds leading 0)
+    """
+
     def func_wrapper(*args):
         if len(args) < 2:
             BadInputException(
@@ -207,7 +209,7 @@ class OpenPGPcard:
         #  self.touchscreen : bool, has a touchescreen ?
 
     def __del__(self):
-        # Disconnect device
+        """Disconnect device."""
         if hasattr(self, "connection"):
             del self.connection
 
@@ -282,7 +284,7 @@ class OpenPGPcard:
 
     @check_hex
     def select_data(self, filehex, param_1=0, param_2=4):
-        # Select a data object : filehex is 2 bytes (4 string hex)
+        """Select a data object : filehex is 2 bytes (4 string hex)."""
         apdu_command = [
             0x00,
             0xA5,
@@ -294,7 +296,7 @@ class OpenPGPcard:
 
     @check_hex
     def get_data(self, filehex, data_hex=""):
-        # Binary read / ISO read the object
+        """Binary read / ISO read the object"""
         if self.debug:
             print(f"Read Data {data_hex} in 0x{filehex}")
         param_1 = int(filehex[0:2], 16)
@@ -304,7 +306,7 @@ class OpenPGPcard:
         return dataresp
 
     def get_next_data(self, param_1=0, param_2=0, data_hex=""):
-        # continue read
+        """Continue read."""
         if self.debug:
             print("Read next data", data_hex)
         apdu_command = [0x00, 0xCC, param_1, param_2]
@@ -322,7 +324,7 @@ class OpenPGPcard:
         return blkdata
 
     def get_identifier(self):
-        # Full application identifier
+        """Full application identifier"""
         resp = self.get_data("4F")
         if len(resp) != 16:
             raise DataException("Application identifier data shall be 16 bytes long.")
@@ -346,8 +348,9 @@ class OpenPGPcard:
             print(f"Serial : {self.serial}")
 
     def get_length(self):
-        # Extended length info DO 7F66 : 0202 xxxx 0202 xxxx
-        #  Also bit 7 in Application Data "0x73"
+        """Extended length info DO 7F66 : 0202 xxxx 0202 xxxx
+        Also bit 7 in Application Data "0x73"
+        """
         self.max_cmd = 256
         self.max_rsp = 256
         if self.pgpvermaj >= 3:
@@ -362,7 +365,7 @@ class OpenPGPcard:
                 raise DataException("Extended length info incorrect format.")
 
     def get_features(self):
-        # Features optional DO 7F74
+        """Features optional DO 7F74"""
         self.display = False
         self.bio = False
         self.button = False
@@ -419,11 +422,11 @@ class OpenPGPcard:
         # print("TouchScreen ?", capability_message(self.touchscreen))
 
     def get_historical_bytes(self):
-        # Historical bytes DO 5F52
+        """Historical bytes DO 5F52"""
         return self.get_data("5F52")
 
     def get_application_data(self):
-        # Application Related Data DO 6E
+        """Application Related Data DO 6E"""
         resp = self.get_data("6E")
         # ToDo : decoding
         # C0 : 10 bytes info about capabilities
@@ -451,14 +454,16 @@ class OpenPGPcard:
         self.activate_file()
 
     def get_random(self, len_data):
-        # Get challenge INS=0x84
-        # return len bytes of random (not integer)
-        # ToDo : make it as optional, 6D00 error?
+        """Get challenge INS=0x84
+        Return len bytes of random (not integer)
+        ToDo : make it as optional, 6D00 error?
+        """
         return bytes(self.send_apdu([0, 0x84, 0, 0], [], len_data))
 
     def get_pin_status(self, pin_bank):
-        # return remaining tries left for the given PIN bank address (1, 2 or 3)
-        # if 0 : PIN is blocked, if 9000 : PIN has been verified
+        """Return remaining tries left for the given PIN bank address (1, 2 or 3)
+        If return 0 : PIN is blocked, if 9000 : PIN has been verified
+        """
         try:
             self.verify_pin(pin_bank, "")
             return 9000
@@ -470,7 +475,7 @@ class OpenPGPcard:
             raise
 
     def change_pin(self, old_pin, new_pin, pin_index):
-        # Change PIN index number (index : 1 or 3)
+        """Change PIN index number (index : 1 or 3)."""
         if pin_index not in (3, 1):
             raise DataException("Bad PIN index, must be 1 or 3.")
         old_pin_bin = old_pin.encode("utf8")
@@ -486,8 +491,9 @@ class OpenPGPcard:
         self.send_apdu([0, 0x24, 0, 0x80 + pin_index], to_list(data))
 
     def verify_pin(self, pin_bank, pin_string):
-        # Verify PIN code : pin_bank is 1, 2 or 3 for SW1, SW2 or SW3
-        # Call CHANGE REFERENCE DATA card command
+        """Verify PIN code : pin_bank is 1, 2 or 3 for SW1, SW2 or SW3
+        Call CHANGE REFERENCE DATA card command
+        """
         if pin_bank not in (1, 2, 3):
             raise DataException("Bad PIN index, must be 1, 2 or 3.")
         if pin_string:
@@ -499,35 +505,40 @@ class OpenPGPcard:
 
     @check_hex
     def gen_key(self, keypos_hex):
-        # Generate an asymmetric key pair in keypos slot address
-        #  Digital signature : 0xB600 : gen key according to algorithm data in C1
-        #  Confidentiality :   0xB800 : gen key according to algorithm data in C2
-        #  Authentication  :   0xA400 : gen key according to algorithm data in C3
+        """Generate an asymmetric key pair in keypos slot address
+        Digital signature : 0xB600 : gen key according to algorithm data in C1
+        Confidentiality :   0xB800 : gen key according to algorithm data in C2
+        Authentication  :   0xA400 : gen key according to algorithm data in C3
+        """
         return bytes(self.send_apdu([0, 0x47, 0x80, 0], toBytes(keypos_hex), APDU_LONG))
 
     @check_hex
     def get_public_key(self, keypos_hex):
-        # Get the public part of the key pair in keypos slot address
+        """Get the public part of the key pair in keypos slot address"""
         return bytes(self.send_apdu([0, 0x47, 0x81, 0], toBytes(keypos_hex), APDU_LONG))
 
     def sign(self, data):
-        # Sign data, with Compute Digital Signature command
+        """Sign data, with Compute Digital Signature command"""
         return bytes(self.send_apdu([0, 0x2A, 0x9E, 0x9A], to_list(data)))
 
     def sign_ec_der(self, hashdata):
-        # Sign with ECDSA hash data and output signature as ASN1 DER encoded
-        # hashdata is the same size in bits of the EC key
+        """Sign with ECDSA hash data and output signature as ASN1 DER encoded
+        hashdata is the same size in bits of the EC key
+        """
         return der_coding.encode_der(self.sign(hashdata))
 
     def encipher(self):
-        # ToDo
+        """Call ENC command
+        ToDo
+        """
         raise NotImplementedError()
 
     def decipher(self, data):
         return bytes(self.send_apdu([0, 0x2A, 0x80, 0x86], to_list(data)))
 
     def decipher_25519(self, ext_pubkey):
-        # for ECDH with Curve25519
-        # ext_pubkey is a 32 bytes "x" public key
+        """For ECDH with Curve25519
+        ext_pubkey is a 32 bytes "x" public key
+        """
         data_field = b"\xA6\x12\x7F\x49\x22\x86\x20" + ext_pubkey
         return self.decipher(data_field)

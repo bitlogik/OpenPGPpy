@@ -16,7 +16,7 @@
 
 
 def encode_int(intarray):
-    # encode a bytes array to a DER integer (bytes list)
+    """Encode a bytes array to a DER integer (bytes list)."""
     if intarray[0] >= 128:
         return [2, len(intarray) + 1, 0, *intarray]
     if intarray[0] == 0:
@@ -25,7 +25,7 @@ def encode_int(intarray):
 
 
 def encode_der(sigdata):
-    # Encode raw signature R|S (2x EC size bytes) into ASN1 DER
+    """Encode raw signature R|S (2x EC size bytes) into ASN1 DER."""
     ec_size_bytes = len(sigdata) // 2
     int_r = encode_int(sigdata[:ec_size_bytes])
     int_s = encode_int(sigdata[ec_size_bytes:])
