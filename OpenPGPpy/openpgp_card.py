@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 
+from logging import getLogger
 import time
 from .der_coding import encode_der, decode_do
 
@@ -24,6 +25,9 @@ try:
     from smartcard.util import toBytes, toHexString
 except ModuleNotFoundError as exc:
     raise ModuleNotFoundError("pyscard not installed ?") from exc
+
+
+logger = getLogger(__name__)
 
 
 # Exception classes for OpenPGPcard
@@ -105,8 +109,9 @@ def to_list(binstr):
 
 
 def print_list(liststr):
+    """Output a list pretty in the debug logger."""
     for item in liststr:
-        print(f" - {item}")
+        logger.debug(" - %s", item)
 
 
 # Core class OpenPGPcard
@@ -143,42 +148,38 @@ class OpenPGPcard:
         0xF5EC: "F-Secure",
     }
 
-    def __init__(self, debug=False, reader_index=None):
-        self.debug = debug
+    def __init__(self, reader_index=None):
         applet_detected = False
         readers_list = readers()
         if len(readers_list) > 0:
-            if debug:
-                if reader_index is None:
-                    print("Trying to reach OpenPGP app in all readers")
-                print("Available readers :")
-                print_list(readers_list)
+            if reader_index is None:
+                logger.debug("Trying to reach the OpenPGP app in all readers")
+            logger.debug("Available readers :")
+            print_list(readers_list)
             if reader_index is not None:
+                if not isinstance(reader_index, int):
+                    raise ValueError("reader_index must be int.")
                 if len(readers_list) > reader_index:
                     readers_list = readers_list[reader_index : reader_index + 1]
                 else:
                     raise ConnectionException("Reader index out of readers detected")
-                if debug:
-                    print(f"Using reader index #{reader_index}")
+                logger.debug("Using reader index #%i", reader_index)
             for reader in readers_list:
                 applet_detected = False
                 try:
-                    if debug:
-                        print("Trying with reader :", reader)
+                    logger.debug("Trying with reader : %s", reader)
                     self.connection = reader.createConnection()
                     self.connection.connect()
                     apdu_select = [0x00, 0xA4, 0x04, 0x00]
                     self.send_apdu(apdu_select, OpenPGPcard.AppID)
                     applet_detected = hasattr(self, "connection")
                 except Exception:
-                    if debug:
-                        print("Fail with this reader")
+                    logger.debug("Fail with this reader")
                     if reader_index is not None:
                         raise ConnectionException("No OpenPGP applet on this reader.")
                     continue
                 if applet_detected:
-                    if debug:
-                        print("An OpenPGP applet detected, using", reader.name)
+                    logger.debug("An OpenPGP applet detected, using %s", reader.name)
                     self.name = reader.name
                     break
         if applet_detected:
@@ -248,34 +249,32 @@ class OpenPGPcard:
                 apdu += [0, 0]
             else:
                 raise DataException("Expected data response too large")
-        if self.debug:
-            print(f" Sending 0x{apdu_header[1]:X} command with {len_data} bytes data")
-            if exp_resp_len > 0:
-                print(f"  with Le={exp_resp_len}")
-            print(f"-> {toHexString(apdu)}")
-            t_env = time.time()
+        logger.debug(
+            f" Sending 0x{apdu_header[1]:X} command with {len_data} bytes data"
+        )
+        if exp_resp_len > 0:
+            logger.debug(f"  with Le={exp_resp_len}")
+        logger.debug(f"-> {toHexString(apdu)}")
+        t_env = time.time()
         data, sw_byte1, sw_byte2 = self.connection.transmit(apdu)
-        if self.debug:
-            t_ans = (time.time() - t_env) * 1000
-            print(
-                " Received %i bytes data : SW 0x%02X%02X - duration: %.1f ms"
-                % (len(data), sw_byte1, sw_byte2, t_ans)
-            )
-            if len(data) > 0:
-                print(f"<- {toHexString(data)}")
+        t_ans = (time.time() - t_env) * 1000
+        logger.debug(
+            " Received %i bytes data : SW 0x%02X%02X - duration: %.1f ms"
+            % (len(data), sw_byte1, sw_byte2, t_ans)
+        )
+        if len(data) > 0:
+            logger.debug(f"<- {toHexString(data)}")
         while sw_byte1 == 0x61:
-            if self.debug:
-                t_env = time.time()
+            t_env = time.time()
             datacompl, sw_byte1, sw_byte2 = self.connection.transmit(
                 [0x00, 0xC0, 0, 0, 0]
             )
-            if self.debug:
-                t_ans = (time.time() - t_env) * 1000
-                print(
-                    " Received remaining %i bytes : 0x%02X%02X - duration: %.1f ms"
-                    % (len(datacompl), sw_byte1, sw_byte2, t_ans)
-                )
-                print(f"<- {toHexString(datacompl)}")
+            t_ans = (time.time() - t_env) * 1000
+            logger.debug(
+                " Received remaining %i bytes : 0x%02X%02X - duration: %.1f ms"
+                % (len(datacompl), sw_byte1, sw_byte2, t_ans)
+            )
+            logger.debug(f"<- {toHexString(datacompl)}")
             data += datacompl
         if sw_byte1 == 0x63 and sw_byte2 & 0xF0 == 0xC0:
             raise PinException(sw_byte2 - 0xC0)
@@ -298,8 +297,7 @@ class OpenPGPcard:
     @check_hex
     def get_data(self, filehex, data_hex=""):
         """Binary read / ISO read the object"""
-        if self.debug:
-            print(f"Read Data {data_hex} in 0x{filehex}")
+        logger.debug(f"Read Data {data_hex} in 0x{filehex}")
         param_1 = int(filehex[0:2], 16)
         param_2 = int(filehex[2:4], 16)
         apdu_command = [0x00, 0xCA, param_1, param_2]
@@ -310,16 +308,14 @@ class OpenPGPcard:
 
     def get_next_data(self, param_1=0, param_2=0, data_hex=""):
         """Continue read."""
-        if self.debug:
-            print("Read next data", data_hex)
+        logger.debug("Read next data %s", data_hex)
         apdu_command = [0x00, 0xCC, param_1, param_2]
         blkdata = self.send_apdu(apdu_command, toBytes(data_hex))
         return blkdata
 
     @check_hex
     def put_data(self, filehex, data_hex=""):
-        if self.debug:
-            print(f"Put data {data_hex} in 0x{filehex}")
+        logger.debug(f"Put data {data_hex} in 0x{filehex}")
         param_1 = int(filehex[0:2], 16)
         param_2 = int(filehex[2:4], 16)
         apdu_command = [0x00, 0xDA, param_1, param_2]  # or 0xDB command
@@ -354,10 +350,9 @@ class OpenPGPcard:
         else:
             self.manufacturer = OpenPGPcard.default_manufacturer_name
         self.serial = int.from_bytes(resp[10:14], "big")
-        if self.debug:
-            print(f"PGP version : {self.pgpverstr}")
-            print(f"Manufacturer : {self.manufacturer} ({self.manufacturer_id})")
-            print(f"Serial : {self.serial}")
+        logger.debug(f"PGP version : {self.pgpverstr}")
+        logger.debug(f"Manufacturer : {self.manufacturer} ({self.manufacturer_id})")
+        logger.debug(f"Serial : {self.serial}")
 
     def get_length(self):
         """Extended length info DO 7F66 : 0202 xxxx 0202 xxxx
@@ -390,8 +385,7 @@ class OpenPGPcard:
             resp = self.get_data("7F74")
         except PGPCardException as exc:
             if exc.sw_code == 0x6B00 or exc.sw_code == 0x6A83 or exc.sw_code == 0x6A88:
-                if self.debug:
-                    self.display_features()
+                self.display_features()
                 return
             raise
         if resp[:3] == [0x7F, 0x74, 3]:  # Turn constructed DO to simple DO
@@ -415,23 +409,22 @@ class OpenPGPcard:
         self.speaker = check_bit(feature_int, 3)
         self.mic = check_bit(feature_int, 2)
         self.touchscreen = check_bit(feature_int, 1)
-        if self.debug:
-            self.display_features()
+        self.display_features()
 
     def display_features(self):
-        # Print features for debug
-        def capability_message(capability):
-            cap_msg = "Yes" if capability else "No"
-            return cap_msg
+        """Print features for debug"""
 
-        # print("Display ?", capability_message(self.display))
-        # print("Biometric sensor ?", capability_message(self.bio))
-        print("Button ?", capability_message(self.button))
-        # print("Keypad ?", capability_message(self.keypad))
-        # print("LED ?", capability_message(self.led))
-        # print("Speaker ?", capability_message(self.speaker))
-        # print("Microphone ?", capability_message(self.mic))
-        # print("TouchScreen ?", capability_message(self.touchscreen))
+        def capability_message(capability):
+            return "Yes" if capability else "No"
+
+        # logger.debug("Display ? %s", capability_message(self.display))
+        # logger.debug("Biometric sensor ? %s", capability_message(self.bio))
+        logger.debug("Button ? %s", capability_message(self.button))
+        # logger.debug("Keypad ? %s", capability_message(self.keypad))
+        # logger.debug("LED ? %s", capability_message(self.led))
+        # logger.debug("Speaker ? %s", capability_message(self.speaker))
+        # logger.debug("Microphone ? %s", capability_message(self.mic))
+        # logger.debug("TouchScreen ? %s", capability_message(self.touchscreen))
 
     def get_historical_bytes(self):
         """Historical bytes DO 5F52"""

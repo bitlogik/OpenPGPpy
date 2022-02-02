@@ -78,11 +78,13 @@ PIN2 : "123456"
 PIN3 : "12345678"
 
 
+**Breaking change** : debug is removed from the instanciate method. Now the lib uses logger.debug. Use a standard logger in your app and you'll get or print the debug traces from this lib. It was previsouly printed out in the standard ouput, now it is always output in logger debug.
+
+
 ## Interface Methods
 
-`OpenPGPcard( debug=False, reader_index=None )`  
+`OpenPGPcard( reader_index=None )`  
 Initializes the OpenPGP device object.  
-if debug = True it displays verbosely all communications with the card.  
 Connects to all readers seeking for an OpenPGP card, selects the app and loads its capabilities.  
 reader_index = None : the constructor will use the first OpenPGP card available in any readers slots detected.  
 reader_index = positive integer : will try to use the given reader/card at the given index (starts at 0).
@@ -150,7 +152,7 @@ Internally called at instanciation. If not present, all features are supposed to
 
 `OpenPGPcard.display_features()`  
 Prints the General Feature Management attributes.
-Internally used by get_features when debug is active.
+Internally used by get_features for debug output.
 
 `OpenPGPcard.get_historical_bytes()`  
 Raw read of the Historical Bytes (data object "5F52").
