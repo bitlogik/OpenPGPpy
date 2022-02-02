@@ -158,7 +158,8 @@ Internally used by get_features for debug output.
 Raw read of the Historical Bytes (data object "5F52").
 
 `OpenPGPcard.get_application_data()`  
-Raw read of the Application Related Data (data object "6E").
+Get the Application Related Data (data object "6E").
+Return the content of the "6E" data object as a Python object with hex encodings.
 
 `OpenPGPcard.terminate_df()`  
 Send the TERMINATE DF command. Used to reset the card.
@@ -235,7 +236,6 @@ See the GNU General Public License for more details.
 ## ToDo
 
 * Secure Messaging
-* Decode Application Related Data to load capabilities and current key types
 * Verify
 * Sign helpers (RSA Tag/DSI)
 * Encipher
