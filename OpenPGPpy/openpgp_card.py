@@ -302,6 +302,8 @@ class OpenPGPcard:
         param_1 = int(filehex[0:2], 16)
         param_2 = int(filehex[2:4], 16)
         apdu_command = [0x00, 0xCA, param_1, param_2]
+        if len(data_hex) == 2:
+            data_hex = "00" + data_hex
         dataresp = self.send_apdu(apdu_command, toBytes(data_hex), APDU_LONG)
         return dataresp
 
@@ -325,7 +327,16 @@ class OpenPGPcard:
 
     def get_identifier(self):
         """Full application identifier"""
-        resp = self.get_data("4F")
+        try:
+            resp = self.get_data("4F")
+        except PGPCardException as exc:
+            if exc.sw_code == 0x6D00:
+                # Retry after 3 seconds
+                time.sleep(3)
+                # Select again the applet
+                self.send_apdu([0x00, 0xA4, 0x04, 0x00], OpenPGPcard.AppID)
+                time.sleep(1)
+                return self.get_identifier()
         if len(resp) != 16:
             raise DataException("Application identifier data shall be 16 bytes long.")
         if resp[:6] != OpenPGPcard.AppID:
@@ -377,7 +388,7 @@ class OpenPGPcard:
         try:
             resp = self.get_data("7F74")
         except PGPCardException as exc:
-            if exc.sw_code == 0x6B00 or exc.sw_code == 0x6A88:
+            if exc.sw_code == 0x6B00 or exc.sw_code == 0x6A83 or exc.sw_code == 0x6A88:
                 if self.debug:
                     self.display_features()
                 return
