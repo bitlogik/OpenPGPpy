@@ -16,7 +16,8 @@
 
 
 import time
-from . import der_coding
+from .der_coding import encode_der, decode_do
+
 
 try:
     from smartcard.System import readers
@@ -439,19 +440,7 @@ class OpenPGPcard:
     def get_application_data(self):
         """Application Related Data DO 6E"""
         resp = self.get_data("6E")
-        # ToDo : decoding
-        # C0 : 10 bytes info about capabilities
-        # C1 : signature algo
-        # C2 : decryption algo
-        # C3 : authentication algo
-        # examples :
-        #   C0 7D000BFE080000FF0000C
-        #      ...
-        #   C2 06 010800001100 decrypt  algo
-        #    01:RSA Modulus:0800=2048 pubexp:0011=17bits ImportPvKeyFmt:00=std(e,p,q)
-        #   C2 0B 122B060104019755010501
-        #    12:ECDH-DEC OID:2B060104019755010501=1.3.6.1.4.1.3029.1.5.1 (Curve25519) <-
-        return resp
+        return decode_do(resp)["6E"]
 
     def terminate_df(self):
         self.send_apdu([0, 0xE6, 0, 0], [])
@@ -536,7 +525,7 @@ class OpenPGPcard:
         """Sign with ECDSA hash data and output signature as ASN1 DER encoded
         hashdata is the same size in bits of the EC key
         """
-        return der_coding.encode_der(self.sign(hashdata))
+        return encode_der(self.sign(hashdata))
 
     def encipher(self):
         """Call ENC command

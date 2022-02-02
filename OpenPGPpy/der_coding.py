@@ -30,3 +30,68 @@ def encode_der(sigdata):
     int_r = encode_int(sigdata[:ec_size_bytes])
     int_s = encode_int(sigdata[ec_size_bytes:])
     return bytes([0x30, len(int_r) + len(int_s), *int_r, *int_s])
+
+
+def intlist_to_hex(bytes_list):
+    """Returns an hex string representing bytes."""
+    if bytes == [] or bytes == b"":
+        return ""
+    else:
+        pformat = "%-0.2X"
+        return (
+            "".join(map(lambda a: pformat % ((a + 256) % 256), bytes_list))
+        ).rstrip()
+
+
+def decode_dos(data, start_index):
+    """Basic ASN1 BER/DER decoder for a single DO."""
+    i = start_index
+    if data[i] & 31 == 31:
+        # Tag has 2 bytes
+        tag = data[i] * 256 + data[i + 1]
+        i += 2
+    else:
+        # Tag is 1 byte
+        tag = data[i]
+        i += 1
+    if data[i] & 128 > 0:
+        # Composed len
+        len_len = data[i] - 128
+        len_data = 0
+        while len_len:
+            len_data *= 256
+            i += 1
+            len_data += data[i]
+            len_len -= 1
+        i += 1
+    else:
+        # Simple len
+        len_data = data[i]
+        i += 1
+    data_read = data[i : i + len_data]
+    return tag, i + len_data, data_read
+
+
+def decode_do(data, level=0):
+    """Decode ASN1 BER/DER Data Objects into a Python object."""
+    # Output a dict with hex values
+    dol_out = {}
+    idx = 0
+    len_all_data = len(data)
+    while idx < len_all_data:
+        tag, idx, data_list = decode_dos(data, idx)
+        if (tag < 256 and tag & 32) or (tag >= 256 and tag & (32 << 8)):
+            # constructed
+            dol_out[f"{tag:02X}"] = decode_do(data_list, level + 1)
+        else:
+            if dol_out.get(f"{tag:02X}"):
+                if not isinstance(dol_out.get(f"{tag:02X}"), list):
+                    dol_out[f"{tag:02X}"] = [
+                        dol_out[f"{tag:02X}"],
+                        intlist_to_hex(data_list),
+                    ]
+                else:
+                    dol_out[f"{tag:02X}"].append(intlist_to_hex(data_list))
+            else:
+                dol_out[f"{tag:02X}"] = intlist_to_hex(data_list)
+    return dol_out
