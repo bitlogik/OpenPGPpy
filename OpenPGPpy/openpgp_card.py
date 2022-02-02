@@ -159,6 +159,8 @@ class OpenPGPcard:
             if reader_index is not None:
                 if not isinstance(reader_index, int):
                     raise ValueError("reader_index must be int.")
+                if reader_index < 0:
+                    raise ValueError("reader_index is a postive index, starts at 0.")
                 if len(readers_list) > reader_index:
                     readers_list = readers_list[reader_index : reader_index + 1]
                 else:
