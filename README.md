@@ -148,7 +148,7 @@ Internally called at instanciation. The max attributes loaded are not yet used b
 
 `OpenPGPcard.get_features()`  
 Reads and decode the optional General Feature Management (data object "7F74").  
-Internally called at instanciation. If not present, all features are supposed to be unavailable (attributes are False).
+Internally called at instanciation. If not present, all features are supposed to be unavailable (attributes are False by default).
 
 `OpenPGPcard.display_features()`  
 Prints the General Feature Management attributes.

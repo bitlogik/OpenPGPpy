@@ -11,7 +11,7 @@ with open("README.md") as readme_file:
 
 setup(
     name="OpenPGPpy",
-    version="0.5",
+    version="0.6",
     description="OpenPGP smartcard communication library",
     long_description=readme + "\n\n",
     long_description_content_type="text/markdown",
@@ -22,7 +22,7 @@ setup(
     license="GPLv3",
     python_requires=">=3.6",
     install_requires=["pyscard"],
-    extras_require={"dev": ["PyNaCl==1.4.0"]},
+    extras_require={"dev": ["PyNaCl==1.5.0"]},  # For the demos
     package_data={},
     include_package_data=False,
     classifiers=[
