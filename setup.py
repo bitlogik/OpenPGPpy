@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # OpenPGPpy : setup data
-# Copyright (C) 2020-2021  BitLogiK
+# Copyright (C) 2020-2022  BitLogiK
 
 from setuptools import setup, find_packages
 
