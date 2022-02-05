@@ -78,8 +78,9 @@ PIN2 : "123456"
 PIN3 : "12345678"
 
 
-**Breaking change** : debug is removed from the instanciate method. Now the lib uses logger.debug. Use a standard logger in your app and you'll get or print the debug traces from this lib. It was previsouly printed out in the standard ouput, now it is always output in logger debug.
-
+**Breaking changes** in v0.6 :
+* The debug argument is removed from the instanciate method, and from the class object attribute. Now this library uses logger.debug(). Use a standard logger in your app and you'll get or print the debug traces from this library. It was previsouly printed out in the standard ouput, now it is always output in the logger debug.
+* The get_application_data method returns a Python object, instead of the bytes array raw response from the device. The raw response is internally ASN1-BER decoded, with hex data strings for DOs content.
 
 ## Interface Methods
 
@@ -158,8 +159,8 @@ Internally used by get_features for debug output.
 Raw read of the Historical Bytes (data object "5F52").
 
 `OpenPGPcard.get_application_data()`  
-Get the Application Related Data (data object "6E").
-Return the content of the "6E" data object as a Python object with hex encodings.
+Get the Application Related Data (data object "6E").  
+Return the content of the "6E" data object as a Python object with hex encodings data.
 
 `OpenPGPcard.terminate_df()`  
 Send the TERMINATE DF command. Used to reset the card.
@@ -182,7 +183,7 @@ Verify the PIN code : pin_bank is 1, 2 or 3 for respectively SW1, SW2 or SW3. pi
 
 `OpenPGPcard.get_pin_status( pin_bank )`  
 Reads PIN status : returns remaining tries left for the given PIN bank address (1, 2 or 3).  
-Return value is 1, 2 or 3 : number of remaining tries before the PIN block.  
+Return value is the number of remaining tries before the PIN block.  
 Return value is 0 : PIN is blocked (no more tries).  
 Return value is 9000 : PIN has been verified (OK).
 

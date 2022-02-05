@@ -1,6 +1,15 @@
 
 # OpenPGPpy changes log
 
+## 0.6
+
+on 2 February 2022
+
+* Improve vendors devices compatibility
+* Add Application DO decoding
+* Logger replaces debug/print
+* Add check on reader_index input
+
 ## 0.5
 
 on 15 June 2021
