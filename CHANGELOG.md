@@ -1,6 +1,13 @@
 
 # OpenPGPpy changes log
 
+
+## 0.7
+
+on 5 February 2022
+
+* Get PIN Status fallbacks to legacy commands
+
 ## 0.6
 
 on 2 February 2022
