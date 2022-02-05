@@ -459,15 +459,26 @@ class OpenPGPcard:
         """Return remaining tries left for the given PIN bank address (1, 2 or 3)
         If return 0 : PIN is blocked, if 9000 : PIN has been verified
         """
-        try:
-            self.verify_pin(pin_bank, "")
-            return 9000
-        except PinException as exc:
-            return exc.retries_left
-        except PGPCardException as exc:
-            if exc.sw_code == 0x6983:
-                return 0
-            raise
+        if self.pgpvermaj * 10000 + self.pgpvermin >= 30001:  # >= v 3.1
+            try:
+                self.verify_pin(pin_bank, "")
+                return 9000
+            except PinException as exc:
+                return exc.retries_left
+            except PGPCardException as exc:
+                if exc.sw_code == 0x6983:
+                    return 0
+                if exc.sw_code != 0x6A80:
+                    raise exc
+        # Fallback to PW status "C4"
+        resp = self.get_data("C4")
+        if len(resp) != 7:
+            raise PGPCardException("Bad PW status status data")
+        if pin_bank == 1:
+            return resp[4]
+        elif pin_bank == 3:
+            return resp[6]
+        raise PGPCardException("Only PW1 and PW3 are available for status")
 
     def change_pin(self, old_pin, new_pin, pin_index):
         """Change PIN index number (index : 1 or 3)."""
