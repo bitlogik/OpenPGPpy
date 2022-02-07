@@ -70,7 +70,7 @@ def main():
     try:
         pubkey_card = mydevice.get_public_key("B800")
     except OpenPGPpy.PGPCardException as exc:
-        if exc.sw_code != 0x6581 and exc.sw_code != 0x6A88:
+        if exc.sw_code != 0x6581 and exc.sw_code != 0x6A88 and exc.sw_code != 0x6F00:
             raise
     if pubkey_card is None:
         print("Setup the new device")
@@ -86,7 +86,7 @@ def main():
             # C2 <- X25519 OID = 1.3.6.1.4.1.3029.1.5.1
             mydevice.put_data("00C2", "122B060104019755010501")
         except OpenPGPpy.PGPCardException as exc:
-            if exc.sw_code == 0x6A80:
+            if exc.sw_code == 0x6A80 or exc.sw_code == 0x6A83:
                 raise Exception("This device is not compatible with X25519.") from exc
             raise
         # Generate key for decrypt ("confidentiality")

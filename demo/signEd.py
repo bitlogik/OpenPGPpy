@@ -65,7 +65,7 @@ def main():
         pubkey_card_all = mydevice.get_public_key("B600")
     except OpenPGPpy.PGPCardException as exc:
         # SW = 0x6581 or 0x6A88 ?
-        if exc.sw_code != 0x6581 and exc.sw_code != 0x6A88:
+        if exc.sw_code != 0x6581 and exc.sw_code != 0x6A88 and exc.sw_code != 0x6F00:
             raise
         # SIGn key was not created, continue to setup this key
     if pubkey_card_all is None:
@@ -82,7 +82,7 @@ def main():
             # C1 <- Ed25519 curve 1.3.6.1.4.1.11591.15.1
             mydevice.put_data("00C1", "132B06010401DA470F01")
         except OpenPGPpy.PGPCardException as exc:
-            if exc.sw_code == 0x6A80:
+            if exc.sw_code == 0x6A80 or exc.sw_code == 0x6A83:
                 raise Exception("This device is not compatible with Ed25519.") from exc
             raise
         # Generate key for sign
