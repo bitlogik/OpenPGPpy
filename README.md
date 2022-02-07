@@ -118,7 +118,8 @@ ExpLongResp is optional integer, the expected response length. Required when sen
 In case data are cut in parts with "61" code, it automatically sends "C0" command to get remaining data and recontructs the full data.  
 Extended frame length is automatically managed.  
 *Note* if an extended data frame response is expected from a short command, the query command must be called with the ExpLongResp argument equals to 65536. Because the ISO7816 standard only allows symmetric type of communication (extended sent, extended received), and this is the easy way to force the command to be sent with an extended format.  
-Throws a PGPCardException if answer status is not 0x9000.  
+Throws PGPCardException if answer status is not 0x9000.  
+Throws ConnectionException if the device is no more available.  
 Returns a bytearray of the card answer.
 
 `OpenPGPcard.select_data( filehex, param_1=0, param_2=4 )`  

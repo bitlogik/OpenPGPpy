@@ -23,6 +23,7 @@ from .der_coding import encode_der, decode_do
 try:
     from smartcard.System import readers
     from smartcard.util import toBytes, toHexString
+    from smartcard.Exceptions import CardConnectionException
 except ModuleNotFoundError as exc:
     raise ModuleNotFoundError("pyscard not installed ?") from exc
 
@@ -259,7 +260,12 @@ class OpenPGPcard:
             logger.debug(f"  with Le={exp_resp_len}")
         logger.debug(f"-> {toHexString(apdu)}")
         t_env = time.time()
-        data, sw_byte1, sw_byte2 = self.connection.transmit(apdu)
+        try:
+            data, sw_byte1, sw_byte2 = self.connection.transmit(apdu)
+        except CardConnectionException:
+            raise ConnectionException(
+                "Error when communicating with the OpenGPG device."
+            )
         t_ans = (time.time() - t_env) * 1000
         logger.debug(
             " Received %i bytes data : SW 0x%02X%02X - duration: %.1f ms"
