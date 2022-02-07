@@ -451,6 +451,12 @@ class OpenPGPcard:
         app_rel_data = decode_do(resp)
         if resp[0] == 0x6E:
             app_rel_data = app_rel_data["6E"]
+        # Set the attribute about max PW length
+        pwstatus_data = bytes.fromhex(app_rel_data["73"]["C4"])
+        if pwstatus_data[1] < 128:
+            self.pw1_maxlen = pwstatus_data[1]
+        if pwstatus_data[1] < 128:
+            self.pw3_maxlen = pwstatus_data[3]
         return app_rel_data
 
     def terminate_df(self):

@@ -100,6 +100,8 @@ The created object has the following attributes :
 * .serial : int, serial number
 * .max_cmd : int, maximum command length
 * .max_rsp : int, maximum response length
+* .pw1_maxlen: int, maximum PIN1 length
+* .pw3_maxlen: int, maximum PIN3 length
 * .display : bool, has a display?
 * .bio : bool, has a biometric sensor?
 * .button : bool, has a button?
