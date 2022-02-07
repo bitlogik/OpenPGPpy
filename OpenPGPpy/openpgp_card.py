@@ -343,6 +343,7 @@ class OpenPGPcard:
                 self.send_apdu([0x00, 0xA4, 0x04, 0x00], OpenPGPcard.AppID)
                 time.sleep(1)
                 return self.get_identifier()
+            raise exc
         if len(resp) != 16:
             raise DataException("Application identifier data shall be 16 bytes long.")
         if resp[:6] != OpenPGPcard.AppID:
