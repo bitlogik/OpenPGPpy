@@ -163,6 +163,10 @@ Raw read of the Historical Bytes (data object "5F52").
 Get the Application Related Data (data object "6E").  
 Return the content of the "6E" data object as a Python object with hex encodings data.
 
+`OpenPGPcard.get_pwstatus()`  
+Get the PW Status (data object "C4").  
+Return the content of the "C4" data object as raw bytearray data.
+
 `OpenPGPcard.terminate_df()`  
 Send the TERMINATE DF command. Used to reset the card.
 

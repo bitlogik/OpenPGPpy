@@ -383,6 +383,9 @@ class OpenPGPcard:
             else:
                 raise DataException("Extended length info incorrect format.")
 
+    def get_pwstatus(self):
+        return self.get_data("C4")
+
     def get_features(self):
         """Features optional DO 7F74"""
         self.display = False
@@ -484,7 +487,7 @@ class OpenPGPcard:
                 if exc.sw_code != 0x6A80:
                     raise exc
         # Fallback to PW status "C4"
-        resp = self.get_data("C4")
+        resp = self.get_pwstatus()
         if len(resp) != 7:
             raise PGPCardException("Bad PW status status data")
         if pin_bank == 1:
