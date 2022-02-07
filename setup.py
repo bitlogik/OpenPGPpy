@@ -11,7 +11,7 @@ with open("README.md") as readme_file:
 
 setup(
     name="OpenPGPpy",
-    version="0.7",
+    version="0.8",
     description="OpenPGP smartcard communication library",
     long_description=readme + "\n\n",
     long_description_content_type="text/markdown",

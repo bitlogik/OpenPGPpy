@@ -2,6 +2,16 @@
 # OpenPGPpy changes log
 
 
+## 0.8
+
+on 7 February 2022
+
+* Improve further devices versions compatibility
+* Throws ConnectionException when device not available
+* Add max PIN length attributes
+* Add get_pwstatus method
+* Fix error handling in get_identifier
+
 ## 0.7
 
 on 5 February 2022
