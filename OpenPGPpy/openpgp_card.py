@@ -185,9 +185,10 @@ class OpenPGPcard:
                     self.name = reader.name
                     break
         if applet_detected:
+            self.longer = 0
             # Read device info
-            self.get_application_data()
             self.get_identifier()
+            self.get_application_data()
             self.get_length()
             self.get_features()
 
@@ -305,7 +306,7 @@ class OpenPGPcard:
         apdu_command = [0x00, 0xCA, param_1, param_2]
         if len(data_hex) == 2:
             data_hex = "00" + data_hex
-        dataresp = self.send_apdu(apdu_command, toBytes(data_hex), APDU_LONG)
+        dataresp = self.send_apdu(apdu_command, toBytes(data_hex), self.longer)
         return dataresp
 
     def get_next_data(self, param_1=0, param_2=0, data_hex=""):
@@ -352,6 +353,8 @@ class OpenPGPcard:
         else:
             self.manufacturer = OpenPGPcard.default_manufacturer_name
         self.serial = int.from_bytes(resp[10:14], "big")
+        if self.pgpvermaj >= 3:
+            self.longer = APDU_LONG
         logger.debug(f"PGP version : {self.pgpverstr}")
         logger.debug(f"Manufacturer : {self.manufacturer} ({self.manufacturer_id})")
         logger.debug(f"Serial : {self.serial}")
@@ -435,7 +438,10 @@ class OpenPGPcard:
     def get_application_data(self):
         """Application Related Data DO 6E"""
         resp = self.get_data("6E")
-        return decode_do(resp)["6E"]
+        app_rel_data = decode_do(resp)
+        if resp[0] == 0x6E:
+            app_rel_data = app_rel_data["6E"]
+        return app_rel_data
 
     def terminate_df(self):
         self.send_apdu([0, 0xE6, 0, 0], [])
@@ -516,12 +522,16 @@ class OpenPGPcard:
         Confidentiality :   0xB800 : gen key according to algorithm data in C2
         Authentication  :   0xA400 : gen key according to algorithm data in C3
         """
-        return bytes(self.send_apdu([0, 0x47, 0x80, 0], toBytes(keypos_hex), APDU_LONG))
+        return bytes(
+            self.send_apdu([0, 0x47, 0x80, 0], toBytes(keypos_hex), self.longer)
+        )
 
     @check_hex
     def get_public_key(self, keypos_hex):
         """Get the public part of the key pair in keypos slot address"""
-        return bytes(self.send_apdu([0, 0x47, 0x81, 0], toBytes(keypos_hex), APDU_LONG))
+        return bytes(
+            self.send_apdu([0, 0x47, 0x81, 0], toBytes(keypos_hex), self.longer)
+        )
 
     def sign(self, data):
         """Sign data, with Compute Digital Signature command"""
