@@ -2,6 +2,12 @@
 # OpenPGPpy changes log
 
 
+## 1.0
+
+on 28 April 2022
+
+* Specify PySCard version
+
 ## 0.8
 
 on 7 February 2022
