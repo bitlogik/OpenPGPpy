@@ -2,6 +2,12 @@
 # OpenPGPpy changes log
 
 
+## 1.1
+
+on 26 February 2023
+
+* Relax pyscard version required when not Windows.
+
 ## 1.0
 
 on 28 April 2022
