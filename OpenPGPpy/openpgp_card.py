@@ -276,8 +276,31 @@ class OpenPGPcard:
         )
         if len(data) > 0:
             logger.debug("<- %s", toHexString(data))
+        if sw_byte1 == 0x6C:
+            # T=0 : re-read card with correct Le
+            if len(apdu) == 4:
+                apdu += [0]
+            apdu[-1] = sw_byte2
+            logger.debug(
+                " Sending 0x%02X command again with %i bytes data",
+                apdu_header[1],
+                len_data,
+            )
             logger.debug("-> %s", toHexString(apdu))
             t_env = time.time()
+            try:
+                data, sw_byte1, sw_byte2 = self.connection.transmit(apdu)
+            except CardConnectionException as exc:
+                raise ConnectionException(
+                    "Error while communicating T=0 with the OpenGPG device."
+                ) from exc
+            t_ans = (time.time() - t_env) * 1000
+            logger.debug(
+                " Read %i bytes data : SW 0x%02X%02X - %.1f ms",
+                len(data),
+                sw_byte1,
+                sw_byte2,
+                t_ans,
             )
             logger.debug("<- %s", toHexString(data))
         while sw_byte1 in [0x61, 0x9F, 0x9E]:
