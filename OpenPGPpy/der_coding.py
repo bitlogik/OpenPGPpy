@@ -17,6 +17,7 @@
 
 def encode_int(intarray):
     """Encode a bytes array to a DER integer (bytes list)."""
+    # Add the integer TL header
     if intarray[0] >= 128:
         return [2, len(intarray) + 1, 0, *intarray]
     if intarray[0] == 0:
