@@ -105,10 +105,6 @@ def check_hex(func):
     return func_wrapper
 
 
-def to_list(binstr):
-    return toBytes(binstr.hex())
-
-
 def print_list(liststr):
     """Output a list pretty in the debug logger."""
     for item in liststr:
@@ -548,7 +544,7 @@ class OpenPGPcard:
                 f"Bad PIN #{pin_index} length, must be {pin_min_len} bytes."
             )
         data = old_pin_bin + new_pin_bin
-        self.send_apdu([0, 0x24, 0, 0x80 + pin_index], to_list(data))
+        self.send_apdu([0, 0x24, 0, 0x80 + pin_index], list(data))
 
     def verify_pin(self, pin_bank, pin_string):
         """Verify PIN code : pin_bank is 1, 2 or 3 for SW1, SW2 or SW3
@@ -558,7 +554,7 @@ class OpenPGPcard:
             raise DataException("Bad PIN index, must be 1, 2 or 3.")
         if pin_string:
             self.send_apdu(
-                [0, 0x20, 0, 0x80 + pin_bank], to_list(pin_string.encode("utf8"))
+                [0, 0x20, 0, 0x80 + pin_bank], list(pin_string.encode("utf8"))
             )
         else:
             self.send_apdu([0, 0x20, 0, 0x80 + pin_bank], [])
@@ -583,7 +579,7 @@ class OpenPGPcard:
 
     def sign(self, data):
         """Sign data, with Compute Digital Signature command"""
-        return bytes(self.send_apdu([0, 0x2A, 0x9E, 0x9A], to_list(data)))
+        return bytes(self.send_apdu([0, 0x2A, 0x9E, 0x9A], list(data)))
 
     def sign_ec_der(self, hashdata):
         """Sign with ECDSA hash data and output signature as ASN1 DER encoded
@@ -598,7 +594,7 @@ class OpenPGPcard:
         raise NotImplementedError()
 
     def decipher(self, data):
-        return bytes(self.send_apdu([0, 0x2A, 0x80, 0x86], to_list(data)))
+        return bytes(self.send_apdu([0, 0x2A, 0x80, 0x86], list(data)))
 
     def decipher_25519(self, ext_pubkey):
         """For ECDH with Curve25519
