@@ -121,9 +121,8 @@ def main():
     except OpenPGPpy.PGPCardException as exc:
         if exc.sw_code == 0x6982:
             print("Error: Wrong PIN")
-            # buggy ?
-            # remain = mydevice.get_pin_status(1)
-            # print(f"{remain} tries remaining")
+            remain = mydevice.get_pin_status(1)
+            print(f"{remain} tries remaining")
             return
         if exc.sw_code == 0x6A80:
             print("Error: Incorrect PIN format")
