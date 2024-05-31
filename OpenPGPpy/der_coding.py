@@ -34,13 +34,7 @@ def encode_der(sigdata):
 
 def intlist_to_hex(bytes_list):
     """Returns an hex string representing bytes."""
-    if bytes == [] or bytes == b"":
-        return ""
-    else:
-        pformat = "%-0.2X"
-        return (
-            "".join(map(lambda a: pformat % ((a + 256) % 256), bytes_list))
-        ).rstrip()
+    return bytes(bytes_list).hex().upper()
 
 
 def decode_dos(data, start_index):
