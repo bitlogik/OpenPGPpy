@@ -1,6 +1,4 @@
-
 # OpenPGPpy
-
 
 ### OpenPGP smartcard communication library
 
@@ -10,7 +8,6 @@ Provides access methods in Python to an OpenPGP card application, as defined in
 https://gnupg.org/ftp/specs/OpenPGP-smart-card-application-3.3.pdf
 
 No need to have GnuPG or similar binary, with OpenPGPpy one can setup and use an OpenPGP device (such as Yubico 5) right away in Python.
-
 
 ## Installation and requirements
 
@@ -25,12 +22,13 @@ Fedora / CentOS / RHEL
 `yum install python3-pip python3-pyscard python3-setuptools pcsc-lite-ccid`
 
 On some Linux, starts PCSCd service
+
 ```
 (sudo) systemctl start pcscd
 (sudo) systemctl enable pcscd
 ```
 
-It uses Pyscard, but this is listed in pip dependencies. So Pyscard is automatically installed when you install this package. In Linux, We recommend to install Pyscard using the distro package manager (see above).
+It uses Pyscard, and this is listed in pip dependencies. So Pyscard is automatically installed when you install this package. In Linux, We recommend to install Pyscard using the distro package manager (see above).
 
 ### Installation of this library
 
@@ -38,7 +36,7 @@ Easiest way :
 `python3 -m pip install OpenPGPpy`  
 
 From sources, download and run in this directory :  
-`python3 -m pip  install .`
+`python3 -m pip install .`
 
 ### Use
 
@@ -77,8 +75,8 @@ PIN1 : "123456"
 PIN2 : "123456"  
 PIN3 : "12345678"
 
-
 **Breaking changes** in v0.6 :
+
 * The debug argument is removed from the instanciate method, and from the class object attribute. Now this library uses logger.debug(). Use a standard logger in your app and you'll get or print the debug traces from this library. It was previsouly printed out in the standard ouput, now it is always output in the logger debug.
 * The get_application_data method returns a Python object, instead of the bytes array raw response from the device. The raw response is internally ASN1-BER decoded, with hex data strings for DOs content.
 
@@ -91,6 +89,7 @@ reader_index = None : the constructor will use the first OpenPGP card available 
 reader_index = positive integer : will try to use the given reader/card at the given index (starts at 0).
 
 The created object has the following attributes :
+
 * .name : str, name of the device (or the card reader used)
 * .pgpvermaj : int, OpenPGP application major version (2 or 3)
 * .pgpvermin : int, OpenPGP application minor version
@@ -226,10 +225,9 @@ Decrypts data with the internal device DECryption key with X25519 (Curve25519 EC
 external_publickey argument is "x" 32 bytes, as bytes. It performs an ECDH with the provided public key and the internal device DECryption private key.  
 Requires the PIN2 verified.  
 
-
 ## License
 
-Copyright (C) 2020-2021  BitLogiK SAS
+Copyright (C) 2020-2024  BitLogiK SAS
 
 This program is free software: you can redistribute it and/or modify  
 it under the terms of the GNU General Public License as published by  
@@ -240,7 +238,6 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
 See the GNU General Public License for more details.
 
-
 ## ToDo
 
 * Secure Messaging
@@ -248,7 +245,6 @@ See the GNU General Public License for more details.
 * Sign helpers (RSA Tag/DSI)
 * Encipher
 * Make it more user friendly with more abstraction layers and data list, for example set_key(2, "X25519") sends PUT_DATA("122B060104019755010501") in "C2"
-
 
 ## Support
 
