@@ -447,6 +447,7 @@ class OpenPGPcard:
                 self.send_apdu([0x00, 0xA4, 0x04, 0x00], OpenPGPcard.AppID)
                 time.sleep(1)
                 return self.get_application_data()
+            raise exc
         app_rel_data = decode_do(resp)
         if resp[0] == 0x6E:
             app_rel_data = app_rel_data["6E"]
