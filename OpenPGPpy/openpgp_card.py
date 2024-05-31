@@ -350,8 +350,6 @@ class OpenPGPcard:
         else:
             self.manufacturer = OpenPGPcard.default_manufacturer_name
         self.serial = int.from_bytes(resp[10:14], "big")
-        if self.pgpvermaj >= 3:
-            self.longer = APDU_LONG
         logger.debug(f"PGP version : {self.pgpverstr}")
         logger.debug(f"Manufacturer : {self.manufacturer} ({self.manufacturer_id})")
         logger.debug(f"Serial : {self.serial}")
@@ -372,6 +370,8 @@ class OpenPGPcard:
                 self.max_rsp = int.from_bytes(resp[9:11], "big")
             else:
                 raise DataException("Extended length info incorrect format.")
+            if self.max_cmd > APDU_SHORT and self.max_rsp > APDU_SHORT:
+                self.longer = APDU_LONG
 
     def get_pwstatus(self):
         return self.get_data("C4")
