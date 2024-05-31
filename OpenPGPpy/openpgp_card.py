@@ -275,14 +275,16 @@ class OpenPGPcard:
             t_ans,
         )
         if len(data) > 0:
-        while sw_byte1 == 0x61:
             logger.debug("<- %s", toHexString(data))
             logger.debug("-> %s", toHexString(apdu))
             t_env = time.time()
-            datacompl, sw_byte1, sw_byte2 = self.connection.transmit(
-                [0x00, 0xC0, 0, 0, 0]
             )
             logger.debug("<- %s", toHexString(data))
+        while sw_byte1 in [0x61, 0x9F, 0x9E]:
+            logger.debug("Sending GET RESPONSE for %i bytes", sw_byte2)
+            t_env = time.time()
+            apdu = [0x00, 0xC0, 0, 0, sw_byte2]
+            datacompl, sw_byte1, sw_byte2 = self.connection.transmit(apdu)
             t_ans = (time.time() - t_env) * 1000
             logger.debug(
                 " Received remaining %i bytes : 0x%02X%02X - duration: %.1f ms",
