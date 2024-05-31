@@ -110,7 +110,11 @@ def main():
         # Generate key for sign
         pubkey_card_all = mydevice.gen_key("B600")
         # Set UIF for sign : require push button and OpenGPG v3
-        mydevice.put_data("00D6", "0120")
+        try:
+            mydevice.put_data("00D6", "0120")
+        except OpenPGPpy.PGPCardException:
+            # Probaly 6A88, device not compatible
+            pass
     pubkey_card = pubkey_card_all[-65:]
     print('Device "SIG" public key read')
 
