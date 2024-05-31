@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # OpenPGPpy OpenPGPcard : OpenPGP smartcard communication library for Python
-# Copyright (C) 2020-2022  BitLogiK
+# Copyright (C) 2020-2024  BitLogiK
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -119,7 +119,6 @@ def print_list(liststr):
 
 
 class OpenPGPcard:
-
     AppID = toBytes("D27600012401")
     default_manufacturer_name = "- unknown -"
     manufacturer_list = {
@@ -154,7 +153,7 @@ class OpenPGPcard:
         readers_list = readers()
         if len(readers_list) > 0:
             if reader_index is None:
-                logger.debug("Trying to reach the OpenPGP app in all readers")
+                logger.debug("Trying to reach an OpenPGP app in all readers")
             logger.debug("Available readers :")
             print_list(readers_list)
             if reader_index is not None:
@@ -264,7 +263,7 @@ class OpenPGPcard:
             data, sw_byte1, sw_byte2 = self.connection.transmit(apdu)
         except CardConnectionException:
             raise ConnectionException(
-                "Error when communicating with the OpenGPG device."
+                "Error while communicating with the OpenGPG device."
             )
         t_ans = (time.time() - t_env) * 1000
         logger.debug(
