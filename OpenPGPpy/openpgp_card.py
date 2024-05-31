@@ -495,12 +495,12 @@ class OpenPGPcard:
         # Fallback to PW status "C4"
         resp = self.get_pwstatus()
         if len(resp) != 7:
-            raise PGPCardException("Bad PW status status data")
+            raise ConnectionException("Bad PW status status data")
         if pin_bank == 1:
             return resp[4]
         elif pin_bank == 3:
             return resp[6]
-        raise PGPCardException("Only PW1 and PW3 are available for status")
+        raise ConnectionException("Only PW1 and PW3 are available for status")
 
     def change_pin(self, old_pin, new_pin, pin_index):
         """Change PIN index number (index : 1 or 3)."""
