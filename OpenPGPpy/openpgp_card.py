@@ -254,11 +254,11 @@ class OpenPGPcard:
             else:
                 raise DataException("Expected data response too large")
         logger.debug(
-            f" Sending 0x{apdu_header[1]:X} command with {len_data} bytes data"
+            " Sending 0x%02X command with %i bytes data", apdu_header[1], len_data
         )
         if exp_resp_len > 0:
-            logger.debug(f"  with Le={exp_resp_len}")
-        logger.debug(f"-> {toHexString(apdu)}")
+            logger.debug("  with Le=%i", exp_resp_len)
+        logger.debug("-> %s", toHexString(apdu))
         t_env = time.time()
         try:
             data, sw_byte1, sw_byte2 = self.connection.transmit(apdu)
@@ -268,22 +268,30 @@ class OpenPGPcard:
             )
         t_ans = (time.time() - t_env) * 1000
         logger.debug(
-            " Received %i bytes data : SW 0x%02X%02X - duration: %.1f ms"
-            % (len(data), sw_byte1, sw_byte2, t_ans)
+            " Received %i bytes data : SW 0x%02X%02X - duration: %.1f ms",
+            len(data),
+            sw_byte1,
+            sw_byte2,
+            t_ans,
         )
         if len(data) > 0:
-            logger.debug(f"<- {toHexString(data)}")
         while sw_byte1 == 0x61:
+            logger.debug("<- %s", toHexString(data))
+            logger.debug("-> %s", toHexString(apdu))
             t_env = time.time()
             datacompl, sw_byte1, sw_byte2 = self.connection.transmit(
                 [0x00, 0xC0, 0, 0, 0]
             )
+            logger.debug("<- %s", toHexString(data))
             t_ans = (time.time() - t_env) * 1000
             logger.debug(
-                " Received remaining %i bytes : 0x%02X%02X - duration: %.1f ms"
-                % (len(datacompl), sw_byte1, sw_byte2, t_ans)
+                " Received remaining %i bytes : 0x%02X%02X - duration: %.1f ms",
+                len(datacompl),
+                sw_byte1,
+                sw_byte2,
+                t_ans,
             )
-            logger.debug(f"<- {toHexString(datacompl)}")
+            logger.debug("<- %s", toHexString(datacompl))
             data += datacompl
         if sw_byte1 == 0x63 and sw_byte2 & 0xF0 == 0xC0:
             raise PinException(sw_byte2 - 0xC0)
@@ -306,7 +314,7 @@ class OpenPGPcard:
     @check_hex
     def get_data(self, filehex, data_hex=""):
         """Binary read / ISO read the object"""
-        logger.debug(f"Read Data {data_hex} in 0x{filehex}")
+        logger.debug("Read Data %s in 0x%s", data_hex, filehex)
         param_1 = int(filehex[0:2], 16)
         param_2 = int(filehex[2:4], 16)
         apdu_command = [0x00, 0xCA, param_1, param_2]
@@ -324,7 +332,7 @@ class OpenPGPcard:
 
     @check_hex
     def put_data(self, filehex, data_hex=""):
-        logger.debug(f"Put data {data_hex} in 0x{filehex}")
+        logger.debug("Put data %s in 0x%s", data_hex, filehex)
         param_1 = int(filehex[0:2], 16)
         param_2 = int(filehex[2:4], 16)
         apdu_command = [0x00, 0xDA, param_1, param_2]  # or 0xDB command
@@ -350,9 +358,9 @@ class OpenPGPcard:
         else:
             self.manufacturer = OpenPGPcard.default_manufacturer_name
         self.serial = int.from_bytes(resp[10:14], "big")
-        logger.debug(f"PGP version : {self.pgpverstr}")
-        logger.debug(f"Manufacturer : {self.manufacturer} ({self.manufacturer_id})")
-        logger.debug(f"Serial : {self.serial}")
+        logger.debug("PGP version : %s", self.pgpverstr)
+        logger.debug("Manufacturer : %s (%s)", self.manufacturer, self.manufacturer_id)
+        logger.debug("Serial : %s", self.serial)
 
     def get_length(self):
         """Extended length info DO 7F66 : 0202 xxxx 0202 xxxx
