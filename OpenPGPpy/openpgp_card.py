@@ -23,6 +23,7 @@ from .der_coding import encode_der, decode_do
 try:
     from smartcard.System import readers
     from smartcard.util import toBytes, toHexString
+    from smartcard.scard import SCARD_SHARE_EXCLUSIVE
     from smartcard.Exceptions import CardConnectionException
 except ModuleNotFoundError as exc:
     raise ModuleNotFoundError("pyscard not installed ?") from exc
@@ -167,7 +168,7 @@ class OpenPGPcard:
                 try:
                     logger.debug("Trying with reader : %s", reader)
                     self.connection = reader.createConnection()
-                    self.connection.connect()
+                    self.connection.connect(mode=SCARD_SHARE_EXCLUSIVE)
                     apdu_select = [0x00, 0xA4, 0x04, 0x00]
                     self.send_apdu(apdu_select, OpenPGPcard.AppID)
                     applet_detected = hasattr(self, "connection")
