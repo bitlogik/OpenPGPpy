@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # OpenPGPpy : setup data
-# Copyright (C) 2020-2022  BitLogiK
+# Copyright (C) 2020-2024  BitLogiK
 
 import os
 from setuptools import setup, find_packages
@@ -12,7 +12,7 @@ with open("README.md") as readme_file:
 
 setup(
     name="OpenPGPpy",
-    version="1.1",
+    version="1.2",
     description="OpenPGP smartcard communication library",
     long_description=readme + "\n\n",
     long_description_content_type="text/markdown",

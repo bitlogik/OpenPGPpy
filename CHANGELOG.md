@@ -2,6 +2,18 @@
 # OpenPGPpy changes log
 
 
+## 1.2
+
+on 2 June 2024
+
+* Accept T=0 cards
+* Use exclusive card connection
+* Improve exceptions handling
+* Allow long APDU on stricter conditions
+* Improve Get Response compatibility
+* Simplify some code helpers
+* Update pyscard to 2.0.8
+
 ## 1.1
 
 on 26 February 2023
