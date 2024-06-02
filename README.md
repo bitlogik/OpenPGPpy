@@ -147,7 +147,7 @@ Internally called at instanciation.
 
 `OpenPGPcard.get_length()`  
 Only for OpenPGP v3. Reads and decode the Extended Length Info (data object "7F66").  
-Internally called at instanciation. The max attributes loaded are not yet used by others methods.
+Internally called at instanciation.
 
 `OpenPGPcard.get_features()`  
 Reads and decode the optional General Feature Management (data object "7F74").  
