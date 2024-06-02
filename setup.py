@@ -22,7 +22,7 @@ setup(
     url="https://github.com/bitlogik/OpenPGPpy",
     license="GPLv3",
     python_requires=">=3.6",
-    install_requires=["pyscard==2.0.3" if os.name == "nt" else "pyscard>=2.0.0"],
+    install_requires=["pyscard==2.0.8" if os.name == "nt" else "pyscard>=2.0.0"],
     extras_require={"dev": ["PyNaCl==1.5.0"]},  # For the demos
     package_data={},
     include_package_data=False,
